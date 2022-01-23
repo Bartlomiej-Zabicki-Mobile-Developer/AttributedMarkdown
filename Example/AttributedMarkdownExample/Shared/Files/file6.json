@@ -1,0 +1,16 @@
+{
+  "title": "Meet Swift Concurrency - Discover - Apple Developer",
+  "author": null,
+  "date_published": null,
+  "dek": null,
+  "lead_image_url": "https://devimages-cdn.apple.com/wwdc-services/articles/images/69D7450E-2EBA-4DC7-A0CA-0B961772822F/2048.jpeg",
+  "content": "![Spool of thread emoji inside of a speech bubble.](https://devimages-cdn.apple.com/wwdc-services/articles/images/69D7450E-2EBA-4DC7-A0CA-0B961772822F/2048.jpeg)\n\nDiscover the power of asynchronous and concurrent programming in Swift. Meet async/await, which transforms asynchronous functions — such as those using completion handlers — to become more readable and more correct. We’ll take you through the various flavors of structured concurrency for running multiple tasks at once, all while keeping your code free of data races by using Swift actors.\n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/5033/5033_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10132) \n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/5035/5035_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10134) \n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/5034/5034_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10133) \n\n### Update a sample app\n\nOnce you’ve learned the essentials, put it into practice: Follow along as we update a sample app from a previous WWDC and adopt Swift concurrency.\n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/5105/5105_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10194) \n\n### Meet AsyncSequence\n\nSometimes there can be more than one: when you have a sequence of values arriving over time, use the new “for await” syntax to iterate over them.\n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/4948/4948_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10058) \n\n### Discover concurrency across Apple platforms\n\nHundreds of APIs throughout the system have been updated with support for async/await. Find out how the frameworks you use every day have been improved for Swift concurrency.\n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/4885/4885_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10019) \n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/4990/4990_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10095) \n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/4883/4883_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10017) \n\n### Swift concurrency: Behind the scenes\n\nDive into the details of Swift concurrency and discover how Swift provides greater safety from data races and thread explosion while simultaneously improving performance. We’ll explore how Swift tasks differ from Grand Central Dispatch, how the new cooperative threading model works, and how to ensure the best performance for your apps.\n\n [![](https://devimages-cdn.apple.com/wwdc-services/images/119/5175/5175_wide_250x141_2x.jpg)](https://developer.apple.com/wwdc21/10254)",
+  "next_page_url": null,
+  "url": "https://developer.apple.com/news/?id=2o3euotz",
+  "domain": "developer.apple.com",
+  "excerpt": "Async awaits: Discover asynchronous and concurrent programming in Swift.",
+  "word_count": 203,
+  "direction": "ltr",
+  "total_pages": 1,
+  "rendered_pages": 1
+}
