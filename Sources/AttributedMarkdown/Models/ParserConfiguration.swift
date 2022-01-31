@@ -11,5 +11,5 @@ public struct ParserConfiguration {
     let sectionStyles: SectionStyles
     let imagesHandler: ImagesHandler
     
-    static let `default` = ParserConfiguration(sectionStyles: .init(), imagesHandler: FilesImagesHandler())
+    public static let `default` = ParserConfiguration(sectionStyles: .init(), imagesHandler: FilesImagesHandler())
 }
