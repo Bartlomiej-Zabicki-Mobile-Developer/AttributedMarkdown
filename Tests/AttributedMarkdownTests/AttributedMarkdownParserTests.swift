@@ -10,11 +10,27 @@ import XCTest
 
 final class AttributedMarkdownParserTests: XCTestCase {
     
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-//        XCTAssertEqual(AttributedMarkdown().text, "Hello, World!")
+    var attributedMarkdownParser: AttributedMarkdownParser?
+    
+    override func setUp() {
+        super.setUp()
+        attributedMarkdownParser = .init(configuration: .default)
+    }
+    
+    func testSingleHeaderBlock() async throws {
+        let rawString = """
+                        Test
+                        =====
+                        """
+        let attributedString = try await attributedMarkdownParser?.parse(markdown: rawString)
+        
+        var expectedAttributedString = AttributedString("Test\n")
+        expectedAttributedString.backgroundColor = .clear
+        expectedAttributedString.foregroundColor = .white
+        expectedAttributedString.font = .title
+        expectedAttributedString.paragraphStyle = .init()
+        
+        XCTAssertEqual(attributedString, expectedAttributedString)
     }
     
 }
