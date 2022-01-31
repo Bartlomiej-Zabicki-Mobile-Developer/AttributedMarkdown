@@ -44,7 +44,7 @@ final class SectionsGeneratorImpl: SectionsGenerator {
             case .trailing:
                 contentWithoutSectionRules = removeTrailingTokenIfPossible(from: content, token: rule.token)
             case .both:
-                contentWithoutSectionRules = removeLeadingTokenIfPossible(from: content, token: rule.token)
+                contentWithoutSectionRules = removeLeadingTokenIfPossible(from: contentWithoutSectionRules, token: rule.token)
                 contentWithoutSectionRules = removeTrailingTokenIfPossible(from: contentWithoutSectionRules, token: rule.token)
             case .entireLine:
                 let lineCandidate = content.replacingOccurrences(of: rule.token, with: "")
@@ -57,9 +57,11 @@ final class SectionsGeneratorImpl: SectionsGenerator {
             switch rule.type {
             case .unorderedList:
                 contentWithoutSectionRules.insert(contentsOf: "・ ", at: contentWithoutSectionRules.startIndex)
+            case .orderedList:
+                contentWithoutSectionRules.insert(contentsOf: "1. ", at: contentWithoutSectionRules.startIndex)
             default: break
             }
-            return Section(content: content, type: rule.type, influencesPreviousSection: rule.type.influencesPreviousLine)
+            return Section(content: contentWithoutSectionRules, type: rule.type, influencesPreviousSection: rule.type.influencesPreviousLine)
         }
         
 //        let previousSectionAttrubites = SectionType.allCases.filter({ $0.influencesPreviousLine })
@@ -87,7 +89,7 @@ final class SectionsGeneratorImpl: SectionsGenerator {
             return content
         }
         return String(content[content.startIndex...content.index(content.startIndex,
-                                                                 offsetBy: content.count - token.count)])
+                                                                 offsetBy: content.count - token.count - 1)])
     }
     
 }

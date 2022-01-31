@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Section {
+struct Section: Equatable {
     let content: String
     private(set) var type: SectionType
     let influencesPreviousSection: Bool
