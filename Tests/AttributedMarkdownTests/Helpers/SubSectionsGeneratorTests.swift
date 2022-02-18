@@ -35,8 +35,8 @@ class SubSectionsGeneratorTests: XCTestCase {
         let section = Section(content: rawString, type: .body, influencesPreviousSection: false)
         let sections = await subSectionsGenerator.parse(section: section)
         
-        let expectedSubSections: [SubSection] = [.init(content: "not bolded", type: .body),
-                                                 .init(content: "bolded", type: .italic)]
+        let expectedSubSections: [SubSection] = [.init(content: "not italic", type: .body),
+                                                 .init(content: "italic", type: .italic)]
         
         XCTAssertEqual(sections, expectedSubSections)
     }

@@ -31,22 +31,22 @@ extension SubSectionType {
         case .italic:
             return .init(openToken:  .init(token: "*", count: 1, countType: .sameAs, type: .open),
                          otherTokens: [
-                            .init(token: "*", count: 1, countType: .sameAs, type: .open)
+                            .init(token: "*", count: 1, countType: .sameAs, type: .close)
                          ], type: self)
         case .alteranteItalic:
             return .init(openToken:  .init(token: "_", count: 1, countType: .sameAs, type: .open),
                          otherTokens: [
-                            .init(token: "_", count: 1, countType: .sameAs, type: .open)
+                            .init(token: "_", count: 1, countType: .sameAs, type: .close)
                          ], type: self)
         case .image:
             return .init(openToken:  .init(token: "[", count: 1, countType: .sameAs, type: .open),
                          otherTokens: [
-                            .init(token: "]", count: 1, countType: .sameAs, type: .open)
+                            .init(token: "]", count: 1, countType: .sameAs, type: .close)
                          ], type: self)
         case .link:
             return .init(openToken:  .init(token: "(", count: 1, countType: .sameAs, type: .open),
                          otherTokens: [
-                            .init(token: ")", count: 1, countType: .sameAs, type: .open)
+                            .init(token: ")", count: 1, countType: .sameAs, type: .close)
                          ], type: self)
         case .body: return nil
         }
