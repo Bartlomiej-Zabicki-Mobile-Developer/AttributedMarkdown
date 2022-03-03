@@ -49,7 +49,8 @@ final class SubstringsNodeGenerator {
         var lastNodeEndIndex: String.Index { nodes.sorted(by: { $0.rangeInOrigin.upperBound > $1.rangeInOrigin.upperBound }).first?.rangeInOrigin.upperBound ?? sourceString.startIndex }
         
         while let node = findNode(after: lastNodeEndIndex, in: sourceString) {
-            let fillingRange = lastNodeEndIndex...sourceString.index(before: node.rangeInOrigin.lowerBound)
+            let fillingRangeEndIndex = node.rangeInOrigin.lowerBound == sourceString.startIndex ? node.rangeInOrigin.lowerBound : sourceString.index(before: node.rangeInOrigin.lowerBound)
+            let fillingRange = lastNodeEndIndex...fillingRangeEndIndex
             if let fillingNode = generateFillNode(between: fillingRange, in: sourceString) {
                 nodes.append(fillingNode)
             }
@@ -72,20 +73,20 @@ final class SubstringsNodeGenerator {
     }
     
     private func findNode(after index: String.Index, in source: Substring) -> Node? {
-        print("Finding node after: \(index) = \(source[source.index(after: index)...])")
+        print("Finding node after: \(index) = \(source[index...])")
         var node: Node?
         SubSectionType.allCases
             .filter({ $0.rule != nil })
             .forEach { subSectionType in
             guard node == nil else { return }
-                let foundNode = findNode(of: subSectionType.rule!, in: source[source.index(after: index)...])
+                let foundNode = findNode(of: subSectionType.rule!, in: source[index...])
             node = foundNode
         }
         return node
     }
     
     private func generateFillNode(between range: ClosedRange<String.Index>, in source: Substring) -> Node? {
-        guard !range.isEmpty else { return nil }
+        guard !range.isEmpty, range.lowerBound != range.upperBound else { return nil }
         let rangeInOrigin = range.lowerBound...range.upperBound
         let content = source[rangeInOrigin]
         return .init(content: content, type: .body, rangeInOrigin: rangeInOrigin, children: [])
