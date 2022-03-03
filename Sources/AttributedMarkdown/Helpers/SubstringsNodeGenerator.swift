@@ -49,15 +49,21 @@ final class SubstringsNodeGenerator {
         var lastNodeEndIndex: String.Index { nodes.sorted(by: { $0.rangeInOrigin.upperBound > $1.rangeInOrigin.upperBound }).first?.rangeInOrigin.upperBound ?? sourceString.startIndex }
         
         while let node = findNode(after: lastNodeEndIndex, in: sourceString) {
-            let fillingRangeEndIndex = node.rangeInOrigin.lowerBound == sourceString.startIndex ? node.rangeInOrigin.lowerBound : sourceString.index(before: node.rangeInOrigin.lowerBound)
-            let fillingRange = lastNodeEndIndex...fillingRangeEndIndex
+            let fillingRange: ClosedRange<String.Index> = {
+                let fillingRangeEndIndex = node.rangeInOrigin.lowerBound == sourceString.startIndex ? node.rangeInOrigin.lowerBound : sourceString.index(before: node.rangeInOrigin.lowerBound)
+                if lastNodeEndIndex <= fillingRangeEndIndex {
+                    return lastNodeEndIndex...fillingRangeEndIndex
+                } else {
+                    return fillingRangeEndIndex...fillingRangeEndIndex
+                }
+            }()
             if let fillingNode = generateFillNode(between: fillingRange, in: sourceString) {
                 nodes.append(fillingNode)
             }
             nodes.append(node)
         }
         
-        if sourceString.index(after: lastNodeEndIndex) < sourceString.index(before: sourceString.endIndex) {
+        if sourceString.index(after: lastNodeEndIndex) <= sourceString.index(before: sourceString.endIndex) {
             let range = sourceString.index(after: lastNodeEndIndex)...sourceString.index(before: sourceString.endIndex)
             let content = sourceString[range]
             nodes.append(.init(content: content, type: .body, rangeInOrigin: range, children: []))
