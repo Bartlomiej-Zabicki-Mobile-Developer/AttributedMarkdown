@@ -19,6 +19,16 @@ class SubstringsNodesGeneratorTests: XCTestCase {
     
     // MARK: - SingleBlock
     
+    func testBoldy() async throws {
+        let rawString: Substring = "not bolded "
+        let nodes = substringsNodeGenerator.findNodes(in: rawString)
+        
+        let expectedNodes = [Node(content: "not bolded ", type: .body, rangeInOrigin: ClosedRange(range: 0...10, in: rawString), children: [])]
+        
+        XCTAssertEqual(nodes.compactMap { $0.content }, expectedNodes.compactMap { $0.content })
+        XCTAssertEqual(nodes, expectedNodes)
+    }
+    
     func testBoldSubsectionOnEnd() async throws {
         let rawString: Substring = "not bolded **bolded**"
         let nodes = substringsNodeGenerator.findNodes(in: rawString)
@@ -89,6 +99,8 @@ class SubstringsNodesGeneratorTests: XCTestCase {
         XCTAssertEqual(nodes.compactMap { $0.rangeInOrigin }, expectedNodes.compactMap { $0.rangeInOrigin })
         XCTAssertEqual(nodes, expectedNodes)
     }
+    
+    // MARK: - Siblings
     
     func testItalicAndBoldSubsectionAsSublings() async throws {
         let rawString: Substring = "not italic *italic* **bolded**"

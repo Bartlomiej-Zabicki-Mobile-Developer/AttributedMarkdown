@@ -64,15 +64,15 @@ final class SubstringsNodeGenerator {
         }
         
         if sourceString.index(after: lastNodeEndIndex) <= sourceString.index(before: sourceString.endIndex) {
-            let range = sourceString.index(after: lastNodeEndIndex)...sourceString.index(before: sourceString.endIndex)
+            let range: ClosedRange<String.Index> = {
+                if lastNodeEndIndex == sourceString.startIndex {
+                    return sourceString.startIndex...sourceString.index(before: sourceString.endIndex)
+                } else {
+                    return sourceString.index(after: lastNodeEndIndex)...sourceString.index(before: sourceString.endIndex)
+                }
+            }()
             let content = sourceString[range]
             nodes.append(.init(content: content, type: .body, rangeInOrigin: range, children: []))
-        }
-        
-        if nodes.isEmpty {
-            nodes = [
-                .init(content: sourceString, type: .body, rangeInOrigin: sourceString.startIndex...sourceString.endIndex, children: [])
-            ]
         }
         
         return nodes
