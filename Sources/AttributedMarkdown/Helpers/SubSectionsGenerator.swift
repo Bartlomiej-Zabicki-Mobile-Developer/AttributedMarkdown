@@ -13,7 +13,7 @@ protocol SubSectionsGenerator {
 
 extension SubSectionType {
     
-    init(from source: SubSectionsGeneratorImpl.Node.NodeType) {
+    init(from source: Node.NodeType) {
         switch source {
         case .body:
             self = .body
@@ -39,39 +39,6 @@ extension SubSectionType {
  */
 final class SubSectionsGeneratorImpl: SubSectionsGenerator {
     
-    struct Node {
-        
-        enum NodeType {
-            case bold
-            case italic
-            case image
-            case link
-            case body
-            
-            init(from source: SubSectionType) {
-                switch source {
-                case .bold, .alternateBold:
-                    self = .bold
-                case .italic, .alteranteItalic:
-                    self = .italic
-                case .image:
-                    self = .image
-                case .link:
-                    self = .link
-                case .body:
-                    self = .body
-                }
-            }
-        }
-        /*
-         Content of the tag without tag
-         */
-        let content: String
-        let type: NodeType
-        let range: ClosedRange<String.Index>
-        let subNodes: [Node]
-    }
-    
     struct SubSectionFound {
         let range: ClosedRange<String.Index>
         let tokensRanges: [ClosedRange<String.Index>]
@@ -91,17 +58,17 @@ final class SubSectionsGeneratorImpl: SubSectionsGenerator {
         
         var nodes: [Node] = separateLinesAndWhitespaces.compactMap { substring in
             subsectionNodes(in: substring)
-        }
+        }.flatMap({ $0 })
         
         nodes.forEach({ node in
             guard var lastSubsection = separateSubsections.last else {
-                separateSubsections.append(.init(content: node.content, type: .init(from: node.type)))
+                separateSubsections.append(.init(content: String(node.content), type: .init(from: node.type)))
                 return
             }
             if lastSubsection.type == .init(from: node.type) {
-                separateSubsections[separateSubsections.count - 1] = .init(content: [lastSubsection.content, node.content].joined(separator: " "), type: .init(from: node.type))
+                separateSubsections[separateSubsections.count - 1] = .init(content: [lastSubsection.content, String(node.content)].joined(separator: " "), type: .init(from: node.type))
             } else {
-                separateSubsections.append(.init(content: node.content, type: .init(from: node.type)))
+                separateSubsections.append(.init(content: String(node.content), type: .init(from: node.type)))
             }
         })
         
@@ -109,32 +76,33 @@ final class SubSectionsGeneratorImpl: SubSectionsGenerator {
         return separateSubsections
     }
     
-    private func subsectionNodes(in content: Substring) -> Node {
-        var node: Node?
+    private func subsectionNodes(in content: Substring) -> [Node] {
+        var nodes: [Node] = []
         SubSectionType.allCases
             .filter({ $0.rule != nil })
             .forEach({ subsectionType in
-                guard node == nil, let subSectionRange = range(of: subsectionType.rule!, in: content) else {
+                return
+                guard nodes.isEmpty, let subSectionRange = range(of: subsectionType.rule!, in: content) else {
                     return
                 }
-                let nodeContent = content[subSectionRange.range]
-                let subNodes: [Node] = [subsectionNodes(in: nodeContent)].filter({ $0.type != .body })
-                node = .init(content: subSectionRange.content, type: .init(from: subsectionType), range: subSectionRange.range, subNodes: subNodes)
+                let nodeContent = Substring(subSectionRange.content)
+                let subNodes: [Node] = subsectionNodes(in: nodeContent).filter({ $0.type != .body })
+                nodes.append(.init(content: Substring(subSectionRange.content), type: .init(from: subsectionType), rangeInOrigin: subSectionRange.range, children: subNodes))
             })
         
-        let stringContent = String(content)
-        if let node = node {
-            return node
+        if !nodes.isEmpty, let lastNode = nodes.last {
+            let indexAfterPreviousNode = content.index(after: lastNode.rangeInOrigin.upperBound)
+            let range = indexAfterPreviousNode..<content.endIndex
+            guard !range.isEmpty else { return nodes }
+            let nextNodes = subsectionNodes(in: content[range])
+            if !nextNodes.isEmpty {
+                nodes.append(contentsOf: nextNodes)
+            }
+            return nodes
         } else {
-            return .init(content: stringContent, type: .body, range: stringContent.startIndex...stringContent.endIndex, subNodes: [])
+            let stringContent = String(content)
+            return [.init(content: Substring(stringContent), type: .body, rangeInOrigin: stringContent.startIndex...stringContent.endIndex, children: [])]
         }
-//        let flattenNodes = nodes.flatMap({ $0 })
-//        let stringContent = String(content)
-//        if !flattenNodes.isEmpty {
-//            return flattenNodes
-//        } else {
-//            return [.init(content: .init(content), type: .body, range: stringContent.startIndex...stringContent.endIndex, subNodes: [])]
-//        }
     }
     
     // MARK: - Private implementation
@@ -162,15 +130,14 @@ final class SubSectionsGeneratorImpl: SubSectionsGenerator {
             
             let closeTokenCloseRangeIndex = sourceString.index(closeRange.upperBound, offsetBy: -1)
             
-            let openTokenEndIndex = sourceString.index(openRange.lowerBound, offsetBy: .init(subSectionRule.openToken.token.count))
+            let openTokenEndIndex = sourceString.index(closeRange.upperBound, offsetBy: .init(subSectionRule.openToken.count - 1))
             
             let range = openRange.upperBound...closeTokenCloseRangeIndex
             
             let modifiedContent = String(sourceString[range])
             
-            return .init(range: range,
-                         tokensRanges: [openRange.lowerBound...openTokenEndIndex,
-                                        closeRange.lowerBound...closeRange.upperBound],
+            return .init(range: openRange.lowerBound...openTokenEndIndex,
+                         tokensRanges: [],
                          content: modifiedContent)
         }
         ///sourceString contains openToken but doesn't contain closeToken

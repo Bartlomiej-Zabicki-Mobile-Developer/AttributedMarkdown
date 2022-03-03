@@ -52,5 +52,17 @@ class SubSectionsGeneratorTests: XCTestCase {
         
         XCTAssertEqual(sections, expectedSubSections)
     }
+    
+    func testItalicInsideBoldSubsection() async throws {
+        let rawString = "Something **Bolded *italic***"
+        let section = Section(content: rawString, type: .body, influencesPreviousSection: false)
+        let sections = await subSectionsGenerator.parse(section: section)
+        
+        let expectedSubSections: [SubSection] = [.init(content: "Something", type: .body),
+                                                 .init(content: "Bolded", type: .bold),
+                                                 .init(content: "italic", type: .italic)]
+        
+        XCTAssertEqual(sections, expectedSubSections)
+    }
 
 }

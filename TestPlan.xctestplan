@@ -1,0 +1,30 @@
+{
+  "configurations" : [
+    {
+      "id" : "FE2829F8-7088-40CC-96DF-B1ABFC6C7B6E",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AttributedMarkdownParserTests",
+        "AttributedMarkdownTests",
+        "SectionsGeneratorTests",
+        "SubSectionsGeneratorTests"
+      ],
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "AttributedMarkdownTests",
+        "name" : "AttributedMarkdownTests"
+      }
+    }
+  ],
+  "version" : 1
+}
