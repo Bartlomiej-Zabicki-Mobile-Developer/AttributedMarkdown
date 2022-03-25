@@ -25,7 +25,8 @@ class SubstringsNodesGeneratorTests: XCTestCase {
         
         let expectedNodes = [Node(content: "not bolded ", type: .body, parent: nil, children: [], isClosed: false)]
         
-        XCTAssertEqual(nodes.compactMap { $0.content }, expectedNodes.compactMap { $0.content })
+        XCTAssertEqual(nodes.generateContent(), expectedNodes.generateContent())
+        XCTAssertEqual(nodes.generateContent(), "not bolded")
         XCTAssertEqual(nodes, expectedNodes)
     }
     
@@ -33,10 +34,13 @@ class SubstringsNodesGeneratorTests: XCTestCase {
         let rawString: Substring = "not bolded **bolded**"
         let nodes = substringsNodeGenerator.findNodes(in: rawString)
 
-        let expectedNodes = [Node(content: "not bolded ", type: .body, parent: nil, children: [], isClosed: false),
-                             Node(content: "bolded", type: .bold, parent: nil, children: [], isClosed: true)]
+        let mainNode = Node(content: "not bolded ", type: .body, parent: nil, children: [], isClosed: false)
+        let child = Node(content: "bolded", type: .bold, parent: mainNode, children: [], isClosed: true)
+        mainNode.children = [child]
+        let expectedNodes = [mainNode]
 
-        XCTAssertEqual(nodes.compactMap { $0.content }, expectedNodes.compactMap { $0.content })
+        XCTAssertEqual(nodes.generateContent(), expectedNodes.generateContent())
+        XCTAssertEqual(nodes.generateContent(), "not bolded bolded")
         XCTAssertEqual(nodes, expectedNodes)
     }
 //
@@ -91,28 +95,51 @@ class SubstringsNodesGeneratorTests: XCTestCase {
     func testItalicSubsectionOnEnd() async throws {
         let rawString: Substring = "not italic *italic*"
         let nodes = substringsNodeGenerator.findNodes(in: rawString)
+        
+        let mainNode = Node(content: "not italic ", type: .body, parent: nil, children: [], isClosed: false)
+        let child = Node(content: "italic", type: .bold, parent: mainNode, children: [], isClosed: true)
+        mainNode.children = [child]
+        let expectedNodes = [mainNode]
 
-        let expectedNodes = [Node(content: "not italic ", type: .body, parent: nil, children: []),
-                             Node(content: "italic", type: .italic, parent: nil, children: [])]
+//        let expectedNodes = [Node(content: "not italic ", type: .body, parent: nil, children: []),
+//                             Node(content: "italic", type: .italic, parent: nil, children: [])]
 
-        XCTAssertEqual(nodes.compactMap { $0.content }, expectedNodes.compactMap { $0.content })
-//        XCTAssertEqual(nodes.compactMap { $0.rangeInOrigin }, expectedNodes.compactMap { $0.rangeInOrigin })
+        XCTAssertEqual(nodes.generateContent(), expectedNodes.generateContent())
+        XCTAssertEqual(nodes.generateContent(), "not italic italic")
         XCTAssertEqual(nodes, expectedNodes)
     }
-//
-//    // MARK: - Siblings
-//
+
+    // MARK: - Siblings
+
     func testItalicAndBoldSubsectionAsSublings() async throws {
         let rawString: Substring = "not italic *italic* **bolded**"
         let nodes = substringsNodeGenerator.findNodes(in: rawString)
+        
+        let mainNode = Node(content: "not italic ", type: .body, parent: nil, children: [])
+        let italicNode = Node(content: "italic", type: .italic, parent: mainNode, children: [])
+        let spaceBodyNode = Node(content: " ", type: .body, parent: nil, children: [])
+        let boldedNode = Node(content: "bolded", type: .bold, parent: spaceBodyNode, children: [])
 
-        let expectedNodes = [Node(content: "not italic ", type: .body, parent: nil, children: []),
-                             Node(content: "italic", type: .italic, parent: nil, children: []),
-                             Node(content: " ", type: .body, parent: nil, children: []),
-                             Node(content: "bolded", type: .bold, parent: nil, children: [])]
+        let expectedNodes = [mainNode, spaceBodyNode]
+        
+        XCTAssertEqual(nodes.generateContent(), "not italic italic bolded")
+        XCTAssertEqual(nodes, expectedNodes)
+    }
+    
+    // MARK: - Children
 
-        XCTAssertEqual(nodes.compactMap { $0.content }, expectedNodes.compactMap { $0.content })
-//        XCTAssertEqual(nodes.compactMap { $0.rangeInOrigin }, expectedNodes.compactMap { $0.rangeInOrigin })
+    func testItalicAndBoldSubsectionAsChildren() async throws {
+        let rawString: Substring = "Test ***italic* bolded**"
+        let nodes = substringsNodeGenerator.findNodes(in: rawString)
+        
+        let mainNode = Node(content: "Test ", type: .body, parent: nil, children: [])
+        let italicNode = Node(content: "italic", type: .italic, parent: mainNode, children: [])
+        let spaceBodyNode = Node(content: " ", type: .body, parent: nil, children: [])
+        let boldedNode = Node(content: "bolded", type: .bold, parent: spaceBodyNode, children: [])
+
+        let expectedNodes = [mainNode, spaceBodyNode]
+        
+        XCTAssertEqual(nodes.generateContent(), "not italic italic bolded")
         XCTAssertEqual(nodes, expectedNodes)
     }
 
@@ -124,6 +151,21 @@ extension ClosedRange where Bound == String.Index {
         let startIndex = source.index(source.startIndex, offsetBy: inputRange.lowerBound, limitedBy: source.endIndex)!
         let endIndex = source.index(source.startIndex, offsetBy: inputRange.upperBound, limitedBy: source.endIndex)!
         self = startIndex...endIndex
+    }
+    
+}
+
+extension Array where Element == Node {
+    
+    func generateContent() -> String {
+        compactMap({
+            $0.content.appending(
+                $0.children.compactMap({ $0.content })
+                    .flatMap({ $0 })
+                    .joined()
+            )
+        })
+            .joined()
     }
     
 }

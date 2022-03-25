@@ -39,7 +39,7 @@ final class SubstringsNodeGenerator {
             if let closeResult = nodeTypeForCloseCharacter(as: sourceString.index(sourceString.startIndex, offsetBy: index), in: sourceString, parent: nil) {
                 canOpenNewNode = lastOpenedNode?.closeParent(nodeType: closeResult.nodeType) != true // didn't close parent or parent is nil
                 if let innerLastOpenedNode = lastOpenedNode, innerLastOpenedNode.isClosed == true {
-                    nodes.append(innerLastOpenedNode)
+//                    nodes.append(innerLastOpenedNode)
                     lastOpenedNode = nil
                     index += closeResult.token.token.count
                 }
@@ -208,7 +208,7 @@ extension SubstringsNodeGenerator {
     final class Node: Equatable {
         
         static func == (lhs: SubstringsNodeGenerator.Node, rhs: SubstringsNodeGenerator.Node) -> Bool {
-            lhs.content == rhs.content && lhs.type == rhs.type && lhs.parent == rhs.parent && lhs.isClosed == rhs.isClosed && lhs.children == rhs.children
+            lhs.content == rhs.content && lhs.type == rhs.type && lhs.parent == rhs.parent && lhs.isClosed == rhs.isClosed //&& lhs.children == rhs.children
         }
         
         
