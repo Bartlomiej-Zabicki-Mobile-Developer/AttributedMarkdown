@@ -12,21 +12,25 @@ enum TokenCountType {
     case sameAs
 }
 
-struct SubSectionRule {
+struct SubSectionRule: Equatable {
     
-    struct Token {
+    struct Token: Equatable {
         let token: String
         let count: Int
-        let countType: TokenCountType
         let type: TokenType
     }
     
     typealias Tokens = [Token]
     
-    enum TokenType {
+    enum TokenType: String, Equatable {
         case open, close, metadataOpen, metadataClose
     }
     let openToken: Token
-    let otherTokens: Tokens
+    let closeToken: Token
+    let metadataTokens: Tokens
     let type: SubSectionType
+    
+    var tokens: Tokens {
+       [openToken, closeToken] + metadataTokens
+    }
 }
