@@ -41,6 +41,7 @@ final class SubstringsNodeGenerator {
                 if let innerLastOpenedNode = lastOpenedNode, innerLastOpenedNode.isClosed == true {
 //                    nodes.append(innerLastOpenedNode)
                     lastOpenedNode = nil
+                    lastOpenedNode = nodes.first(where: { !$0.isClosed })
                     index += closeResult.token.token.count
                 }
             }
@@ -51,13 +52,21 @@ final class SubstringsNodeGenerator {
                canOpenNewNode, let openResult = nodeTypeForOpenCharacter(as: stringIndex, in: sourceString, parent: nil) {
                 let indexOfNewContent = sourceString.index(sourceString.startIndex, offsetBy: index + openResult.token.token.count, limitedBy: sourceString.index(before: sourceString.endIndex))
                 if let innerLastOpenedNode = lastOpenedNode, let indexOfNewContent = indexOfNewContent {
-                    let child: Node = .init(content: Substring(String(.init(unicodeScalarLiteral: sourceString[indexOfNewContent]))), type: openResult.nodeType, parent: lastOpenedNode, children: [])
-                    lastOpenedNode?.children.append(child)
-                    if lastOpenedNode?.parent == nil {
-                        nodes.append(innerLastOpenedNode)
+                    var isInMainTree = (lastOpenedNode?.type == .body) == true
+                    let child: Node = .init(content: "", type: openResult.nodeType, parent: isInMainTree ? nil : lastOpenedNode, children: [])
+                    if isInMainTree {
+                        if let lastOpenedNode = lastOpenedNode {
+                            lastOpenedNode.isClosed = true
+                            nodes.append(lastOpenedNode)
+                        }
+                        nodes.append(child)
+//                        if lastOpenedNode?.parent == nil {
+//                            nodes.append(innerLastOpenedNode)
+//                        }
+                    } else {
+                        lastOpenedNode?.children.append(child)
                     }
                     lastOpenedNode = child
-                    index += openResult.token.token.count + 1
                     index += openResult.token.token.count
                     continue
 //                    break
@@ -75,7 +84,7 @@ final class SubstringsNodeGenerator {
                 if let lastOpenedNode = lastOpenedNode {
                     lastOpenedNode.content.append(character)
                 } else {
-                    lastOpenedNode = .init(content: content, type: .body, parent: nil, children: [], isClosed: false)
+                    lastOpenedNode = .init(content: content, type: .body, parent: nil, children: [])
                 }
             }
             index += 1
@@ -83,6 +92,7 @@ final class SubstringsNodeGenerator {
         }
         
         if let lastOpenedNode = lastOpenedNode, lastOpenedNode.parent == nil, !nodes.contains(lastOpenedNode) {
+            lastOpenedNode.isClosed = true
             nodes.append(lastOpenedNode)
         }
         return nodes
