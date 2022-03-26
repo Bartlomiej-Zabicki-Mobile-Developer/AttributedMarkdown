@@ -42,6 +42,12 @@ final class SubstringsNodeGenerator {
 //                    nodes.append(innerLastOpenedNode)
                     lastOpenedNode = nil
                     lastOpenedNode = nodes.first(where: { !$0.isClosed })
+                    if let innerLastOpenedNode = lastOpenedNode, sourceString.index(sourceString.startIndex, offsetBy: index + closeResult.token.token.count) < sourceString.endIndex {
+                        lastOpenedNode = .init(content: "", type: innerLastOpenedNode.type, parent: innerLastOpenedNode, children: [])
+                        innerLastOpenedNode.children.append(lastOpenedNode!)
+                    } else {
+                        lastOpenedNode?.isClosed = true
+                    }
                     index += closeResult.token.token.count
                 }
             }
@@ -69,12 +75,10 @@ final class SubstringsNodeGenerator {
                     lastOpenedNode = child
                     index += openResult.token.token.count
                     continue
-//                    break
                 } else {
                     lastOpenedNode = .init(content: Substring(String(.init(unicodeScalarLiteral: sourceString[stringIndex]))), type: openResult.nodeType, parent: lastOpenedNode, children: [])
                     index += 1
                     continue
-//                    break
                 }
             }
             if let stringIndex = stringIndex,
