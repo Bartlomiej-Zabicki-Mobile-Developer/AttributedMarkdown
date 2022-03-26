@@ -39,12 +39,10 @@ final class SubstringsNodeGenerator {
             if let closeResult = nodeTypeForCloseCharacter(as: sourceString.index(sourceString.startIndex, offsetBy: index), in: sourceString, parent: nil) {
                 canOpenNewNode = lastOpenedNode?.closeParent(nodeType: closeResult.nodeType) != true // didn't close parent or parent is nil
                 if let innerLastOpenedNode = lastOpenedNode, innerLastOpenedNode.isClosed == true {
-//                    nodes.append(innerLastOpenedNode)
-//                    if let unclosedNode = nodes.first(where: { !$0.isClosed }) {
                     if nodes.isEmpty {
-                                                innerLastOpenedNode.isClosed = true
-                                                nodes.append(innerLastOpenedNode)
-                                                lastOpenedNode = nil
+                        innerLastOpenedNode.isClosed = true
+                        nodes.append(innerLastOpenedNode)
+                        lastOpenedNode = nil
                     } else {
                         // Exists previous not closed node
                         lastOpenedNode = nil
@@ -56,23 +54,17 @@ final class SubstringsNodeGenerator {
                             lastOpenedNode?.isClosed = true
                         }
                     }
-//                    else {
-//                        // First node, so closing is enough
-//                        innerLastOpenedNode.isClosed = true
-//                        nodes.append(innerLastOpenedNode)
-//                        lastOpenedNode = nil
-//                    }
                     index += closeResult.token.token.count
                 }
             }
             print("Cannot find close result")
             let stringIndex = sourceString.index(sourceString.startIndex, offsetBy: index, limitedBy: sourceString.endIndex)
             if let stringIndex = stringIndex,
-                index < sourceString.count,
+               index < sourceString.count,
                canOpenNewNode, let openResult = nodeTypeForOpenCharacter(as: stringIndex, in: sourceString, parent: nil) {
                 let indexOfNewContent = sourceString.index(sourceString.startIndex, offsetBy: index + openResult.token.token.count, limitedBy: sourceString.index(before: sourceString.endIndex))
-                if let innerLastOpenedNode = lastOpenedNode, let indexOfNewContent = indexOfNewContent {
-                    var isInMainTree = (lastOpenedNode?.type == .body) == true
+                if lastOpenedNode != nil, indexOfNewContent != nil {
+                    let isInMainTree = (lastOpenedNode?.type == .body) == true
                     let child: Node = .init(content: "", type: openResult.nodeType, parent: isInMainTree ? nil : lastOpenedNode, children: [])
                     if isInMainTree {
                         if let lastOpenedNode = lastOpenedNode {
@@ -80,9 +72,6 @@ final class SubstringsNodeGenerator {
                             nodes.append(lastOpenedNode)
                         }
                         nodes.append(child)
-//                        if lastOpenedNode?.parent == nil {
-//                            nodes.append(innerLastOpenedNode)
-//                        }
                     } else {
                         lastOpenedNode?.children.append(child)
                     }
@@ -122,7 +111,6 @@ final class SubstringsNodeGenerator {
         guard let nodeCandidates = sourceString[index].markdownNodeCandidates, !nodeCandidates.isEmpty else { return nil }
         let tokenCandidates = nodeCandidates.filter({ $0.tokenType == .open }).filter({ candidate in
             var isValidCandidate = true
-            guard isValidCandidate else { return false }
             if let endIndex = sourceString.index(index, offsetBy: candidate.token.token.count - 1, limitedBy: sourceString.endIndex),
                sourceString.indices.contains(endIndex) {
                 let substring = sourceString[index...endIndex]
@@ -133,32 +121,14 @@ final class SubstringsNodeGenerator {
             }
             return isValidCandidate
         })
-//        let tokenCandidates = nodeCandidates.filter({ $0.tokenType == .open }).filter({ candidate in
-//                var isValidCandidate = true
-//                candidate.token.token.enumerated().forEach { offset, character in
-//                    guard isValidCandidate else { return }
-//                    if let additionalIndex = sourceString.index(index, offsetBy: offset, limitedBy: sourceString.endIndex),
-//                        let candidateIndex = candidate.token.token.index(candidate.token.token.startIndex,
-//                                                                         offsetBy: offset, limitedBy: candidate.token.token.endIndex),
-//                        String(sourceString[sourceString.index(additionalIndex, offsetBy: -1)..<additionalIndex]) == String(candidate.token.token[candidateIndex]) {
-//                        isValidCandidate = true
-//                    } else {
-//                        isValidCandidate = false
-//                    }
-//                }
-//                return isValidCandidate
-//            })
         guard let firstCandidate = tokenCandidates.first else { return nil }
         return .init(nodeType: firstCandidate.nodeType, token: firstCandidate.token, indexAfterNode: sourceString.index(index, offsetBy: firstCandidate.token.token.count))
     }
     
     private func nodeTypeForCloseCharacter(as index: Substring.Index, in sourceString: Substring, parent: Node?) -> NodeFindResult? {
         guard let nodeCandidates = sourceString[index].markdownNodeCandidates, !nodeCandidates.isEmpty else { return nil }
-//        print("Node candidates: \(nodeCandidates)")
         let tokenCandidates = nodeCandidates.filter({ $0.tokenType == .close }).filter({ candidate in
-                var isValidCandidate = true
-//            candidate.token.token.forEach { token in
-                    guard isValidCandidate else { return false}
+            var isValidCandidate = true
             if let endIndex = sourceString.index(index, offsetBy: candidate.token.token.count - 1, limitedBy: sourceString.index(before: sourceString.endIndex)),
                sourceString.indices.contains(endIndex) {
                 let substring = sourceString[index...endIndex]
@@ -167,17 +137,8 @@ final class SubstringsNodeGenerator {
             } else {
                 isValidCandidate = false
             }
-//                    if let additionalIndex = sourceString.index(index, offsetBy: offset, limitedBy: sourceString.endIndex),
-//                        let candidateIndex = candidate.token.token.index(candidate.token.token.startIndex, offsetBy: offset,
-//                                                                         limitedBy: candidate.token.token.endIndex),
-//                       String(sourceString[sourceString.index(additionalIndex, offsetBy: -1)..<additionalIndex]) == String(candidate.token.token[candidateIndex]) {
-//                        isValidCandidate = true
-//                    } else {
-//                        isValidCandidate = false
-//                    }
-//                }
-                return isValidCandidate
-            })
+            return isValidCandidate
+        })
         guard let firstCandidate = tokenCandidates.first else { return nil }
         return .init(nodeType: firstCandidate.nodeType, token: firstCandidate.token, indexAfterNode: sourceString.index(index, offsetBy: firstCandidate.token.token.count - 1))
     }
@@ -187,7 +148,7 @@ final class SubstringsNodeGenerator {
 private extension Character {
     
     var isMarkdownToken: Bool {
-//        !SubSectionType.allCases.compactMap({ $0.rule }).compactMap({ $0.tokens.compactMap({ $0.token }) }).filter({ $0.contains(where: { $0.contains(self) }) }).isEmpty
+        //        !SubSectionType.allCases.compactMap({ $0.rule }).compactMap({ $0.tokens.compactMap({ $0.token }) }).filter({ $0.contains(where: { $0.contains(self) }) }).isEmpty
         return markdownNodeCandidates != nil && markdownNodeCandidates?.isEmpty == false
     }
     
@@ -272,4 +233,4 @@ extension SubstringsNodeGenerator {
     }
     
 }
-    
+

@@ -149,7 +149,7 @@ class SubstringsNodesGeneratorTests: XCTestCase {
 
         let expectedNodes = [mainNode, boldedContainerNode]
         
-        XCTAssertEqual(nodes.generateContent(), "Test italic bolded")
+        XCTAssertEqual(nodes.generateContent(), "Test bolded italic")
         XCTAssertEqual(nodes, expectedNodes)
     }
 
