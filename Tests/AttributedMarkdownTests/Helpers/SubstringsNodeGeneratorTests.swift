@@ -26,7 +26,7 @@ class SubstringsNodesGeneratorTests: XCTestCase {
         let expectedNodes = [Node(content: "not bolded ", type: .body, parent: nil, children: [], isClosed: false)]
         
         XCTAssertEqual(nodes.generateContent(), expectedNodes.generateContent())
-        XCTAssertEqual(nodes.generateContent(), "not bolded")
+        XCTAssertEqual(nodes.generateContent(), "not bolded ")
         XCTAssertEqual(nodes, expectedNodes)
     }
     
@@ -133,13 +133,13 @@ class SubstringsNodesGeneratorTests: XCTestCase {
         let nodes = substringsNodeGenerator.findNodes(in: rawString)
         
         let mainNode = Node(content: "Test ", type: .body, parent: nil, children: [])
-        let italicNode = Node(content: "italic", type: .italic, parent: mainNode, children: [])
-        let spaceBodyNode = Node(content: " ", type: .body, parent: nil, children: [])
-        let boldedNode = Node(content: "bolded", type: .bold, parent: spaceBodyNode, children: [])
+        let boldedNode = Node(content: "", type: .bold, parent: mainNode, children: [])
+        let italicNode = Node(content: "italic", type: .italic, parent: boldedNode, children: [])
+        let boldedContentNode = Node(content: " bolded", type: .bold, parent: boldedNode, children: [])
 
-        let expectedNodes = [mainNode, spaceBodyNode]
+        let expectedNodes = [mainNode]
         
-        XCTAssertEqual(nodes.generateContent(), "not italic italic bolded")
+        XCTAssertEqual(nodes.generateContent(), "Test italic bolded")
         XCTAssertEqual(nodes, expectedNodes)
     }
 

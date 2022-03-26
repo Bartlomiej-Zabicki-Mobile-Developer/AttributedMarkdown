@@ -58,6 +58,7 @@ final class SubstringsNodeGenerator {
                     }
                     lastOpenedNode = child
                     index += openResult.token.token.count + 1
+                    index += openResult.token.token.count
                     continue
 //                    break
                 } else {
@@ -74,14 +75,14 @@ final class SubstringsNodeGenerator {
                 if let lastOpenedNode = lastOpenedNode {
                     lastOpenedNode.content.append(character)
                 } else {
-                    lastOpenedNode = .init(content: content, type: .body, parent: nil, children: [])
+                    lastOpenedNode = .init(content: content, type: .body, parent: nil, children: [], isClosed: false)
                 }
             }
             index += 1
             
         }
         
-        if let lastOpenedNode = lastOpenedNode, !nodes.contains(lastOpenedNode) {
+        if let lastOpenedNode = lastOpenedNode, lastOpenedNode.parent == nil, !nodes.contains(lastOpenedNode) {
             nodes.append(lastOpenedNode)
         }
         return nodes
@@ -94,8 +95,9 @@ final class SubstringsNodeGenerator {
         let tokenCandidates = nodeCandidates.filter({ $0.tokenType == .open }).filter({ candidate in
             var isValidCandidate = true
             guard isValidCandidate else { return false }
-            if let endIndex = sourceString.index(index, offsetBy: candidate.token.token.count, limitedBy: sourceString.endIndex) {
-                let substring = sourceString[index..<endIndex]
+            if let endIndex = sourceString.index(index, offsetBy: candidate.token.token.count - 1, limitedBy: sourceString.endIndex),
+               sourceString.indices.contains(endIndex) {
+                let substring = sourceString[index...endIndex]
                 isValidCandidate = substring == Substring(candidate.token.token)
                 
             } else {
@@ -118,19 +120,20 @@ final class SubstringsNodeGenerator {
 //                }
 //                return isValidCandidate
 //            })
-        guard let firstCandidate = tokenCandidates.first(where: { $0.tokenType == .open}) else { return nil }
+        guard let firstCandidate = tokenCandidates.first else { return nil }
         return .init(nodeType: firstCandidate.nodeType, token: firstCandidate.token, indexAfterNode: sourceString.index(index, offsetBy: firstCandidate.token.token.count))
     }
     
     private func nodeTypeForCloseCharacter(as index: Substring.Index, in sourceString: Substring, parent: Node?) -> NodeFindResult? {
         guard let nodeCandidates = sourceString[index].markdownNodeCandidates, !nodeCandidates.isEmpty else { return nil }
-        print("Node candidates: \(nodeCandidates)")
+//        print("Node candidates: \(nodeCandidates)")
         let tokenCandidates = nodeCandidates.filter({ $0.tokenType == .close }).filter({ candidate in
                 var isValidCandidate = true
 //            candidate.token.token.forEach { token in
                     guard isValidCandidate else { return false}
-            if let endIndex = sourceString.index(index, offsetBy: candidate.token.token.count, limitedBy: sourceString.endIndex) {
-                let substring = sourceString[index..<endIndex]
+            if let endIndex = sourceString.index(index, offsetBy: candidate.token.token.count - 1, limitedBy: sourceString.index(before: sourceString.endIndex)),
+               sourceString.indices.contains(endIndex) {
+                let substring = sourceString[index...endIndex]
                 isValidCandidate = substring == Substring(candidate.token.token)
                 
             } else {
@@ -150,34 +153,6 @@ final class SubstringsNodeGenerator {
         guard let firstCandidate = tokenCandidates.first else { return nil }
         return .init(nodeType: firstCandidate.nodeType, token: firstCandidate.token, indexAfterNode: sourceString.index(index, offsetBy: firstCandidate.token.token.count - 1))
     }
-    
-}
-
-private extension Substring {
-    
-//    subscript(safeIndex: Substring.Index) -> Character? {
-//        guard self.indices.contains(safeIndex) else { return nil }
-//        return self[safeIndex]
-//    }
-//
-//    subscript(safeIndex: Int) -> Character? {
-//        guard self.indices.count > safeIndex else { return nil }
-//        return self[safeIndex]
-//    }
-    
-}
-
-private extension String {
-    
-//    subscript(safeIndex: Substring.Index) -> Character? {
-//        guard self.indices.contains(safeIndex) else { return nil }
-//        return self[safeIndex]
-//    }
-//
-//    subscript(safeIndex: Int) -> Character? {
-//        guard self.indices.count > safeIndex else { return nil }
-//        return self[safeIndex]
-//    }
     
 }
 
