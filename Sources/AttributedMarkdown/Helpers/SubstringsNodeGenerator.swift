@@ -40,14 +40,28 @@ final class SubstringsNodeGenerator {
                 canOpenNewNode = lastOpenedNode?.closeParent(nodeType: closeResult.nodeType) != true // didn't close parent or parent is nil
                 if let innerLastOpenedNode = lastOpenedNode, innerLastOpenedNode.isClosed == true {
 //                    nodes.append(innerLastOpenedNode)
-                    lastOpenedNode = nil
-                    lastOpenedNode = nodes.first(where: { !$0.isClosed })
-                    if let innerLastOpenedNode = lastOpenedNode, sourceString.index(sourceString.startIndex, offsetBy: index + closeResult.token.token.count) < sourceString.endIndex {
-                        lastOpenedNode = .init(content: "", type: innerLastOpenedNode.type, parent: innerLastOpenedNode, children: [])
-                        innerLastOpenedNode.children.append(lastOpenedNode!)
+//                    if let unclosedNode = nodes.first(where: { !$0.isClosed }) {
+                    if nodes.isEmpty {
+                                                innerLastOpenedNode.isClosed = true
+                                                nodes.append(innerLastOpenedNode)
+                                                lastOpenedNode = nil
                     } else {
-                        lastOpenedNode?.isClosed = true
+                        // Exists previous not closed node
+                        lastOpenedNode = nil
+                        lastOpenedNode = nodes.first(where: { !$0.isClosed })
+                        if let innerLastOpenedNode = lastOpenedNode, sourceString.index(sourceString.startIndex, offsetBy: index + closeResult.token.token.count) < sourceString.endIndex {
+                            lastOpenedNode = .init(content: "", type: innerLastOpenedNode.type, parent: innerLastOpenedNode, children: [])
+                            innerLastOpenedNode.children.append(lastOpenedNode!)
+                        } else {
+                            lastOpenedNode?.isClosed = true
+                        }
                     }
+//                    else {
+//                        // First node, so closing is enough
+//                        innerLastOpenedNode.isClosed = true
+//                        nodes.append(innerLastOpenedNode)
+//                        lastOpenedNode = nil
+//                    }
                     index += closeResult.token.token.count
                 }
             }
@@ -76,8 +90,8 @@ final class SubstringsNodeGenerator {
                     index += openResult.token.token.count
                     continue
                 } else {
-                    lastOpenedNode = .init(content: Substring(String(.init(unicodeScalarLiteral: sourceString[stringIndex]))), type: openResult.nodeType, parent: lastOpenedNode, children: [])
-                    index += 1
+                    lastOpenedNode = .init(content: "", type: openResult.nodeType, parent: lastOpenedNode, children: [])
+                    index += openResult.token.token.count
                     continue
                 }
             }
