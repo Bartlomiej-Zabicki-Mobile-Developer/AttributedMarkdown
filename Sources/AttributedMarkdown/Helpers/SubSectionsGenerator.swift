@@ -11,24 +11,6 @@ protocol SubSectionsGenerator {
     func parse(section: Section) -> [SubSection]
 }
 
-extension SubSectionType {
-    
-    init(from source: Node.NodeType) {
-        switch source {
-        case .body:
-            self = .body
-        case .link:
-            self = .link
-        case .italic:
-            self = .italic
-        case .bold:
-            self = .bold
-        case .image:
-            self = .image
-        }
-    }
-}
-
 /*
  Generates node structure
  1. Goes through all lines inside
