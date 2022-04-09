@@ -6,7 +6,6 @@ public final class AttributedMarkdownParser {
     // MARK: - Properties
     
     private(set) var configuration: ParserConfiguration
-    private lazy var sectionsGenerator: SectionsGenerator = SectionsGeneratorImpl()
     
     // MARK: - Initialization
 

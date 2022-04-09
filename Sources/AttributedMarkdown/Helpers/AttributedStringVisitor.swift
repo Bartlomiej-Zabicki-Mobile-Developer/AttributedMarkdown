@@ -24,7 +24,6 @@ struct AttributedStringVisitor: MarkupVisitor {
     
     // MARK: - MarkupVisitor
     
-    //Default visitor
     func defaultVisit(_ markup: Markup) -> AttributedString {
         return formatted(string: markup.format(), forMarkup: markup.parent)
     }
@@ -33,12 +32,8 @@ struct AttributedStringVisitor: MarkupVisitor {
         guard let markup = markup else {
             return .init()
         }
-        
-        if let style = styleFor(markup: markup) {
-            return string.asAttributedString(withStyle: style)
-        } else {
-            return .init()
-        }
+        let keyPath = styleFor(markup: markup)
+        return string.asAttributedString(withStyle: keyPath, in: styles)
     }
     
     public mutating func visit(_ markup: Markup) -> Result {
@@ -50,13 +45,9 @@ struct AttributedStringVisitor: MarkupVisitor {
             }
         }
         
-        print("New Children: \(newChildren)")
         return newChildren.reduce(into: AttributedString()) { partialResult, attributed in
             partialResult.append(attributed)
-                }
-        
-//        let result = markup.accept(&self)
-//        return result
+        }
     }
     public mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Result {
         return defaultVisit(blockQuote)
@@ -148,16 +139,20 @@ struct AttributedStringVisitor: MarkupVisitor {
     
     // MARK: - Private implementation
     
-    private func styleFor(markup: Markup) -> Style? {
+    private func styleFor(markup: Markup) -> AnyKeyPath {
         switch markup {
         case is Heading:
-            return styles.h1
+            return \SectionStyles.h1
         case is Strong:
-            return styles.bold
+            return \SectionStyles.bold
         case is Emphasis:
-            return styles.italic
+            return \SectionStyles.italic
+        case is Markdown.Link:
+            return \SectionStyles.link
+        case is Markdown.BlockQuote:
+            return \SectionStyles.blockquote
         default:
-            return styles.body
+            return \SectionStyles.body
         }
     }
     
@@ -165,38 +160,19 @@ struct AttributedStringVisitor: MarkupVisitor {
 
 extension String {
     
-    func asAttributedString(withStyle style: Style) -> AttributedString {
-        var attrubutedString = AttributedString(self.appending("\n"))
+    func asAttributedString(withStyle styleKeyPath: AnyKeyPath, in styles: SectionStyles) -> AttributedString {
+        let style = styles[keyPath: styleKeyPath] as! Style
+        let rawSource = styles.sectionType(for: styleKeyPath).isInLine ? self : self.appending("\n")
+        var attrubutedString = AttributedString(rawSource)
         let container = AttributeContainer([
-            .paragraphStyle: style.type.paragraphStyle
+            .paragraphStyle: style.paragraphStyle
         ])
         attrubutedString.setAttributes(container)
         attrubutedString.backgroundColor = style.backgroundColor
         attrubutedString.foregroundColor = style.fontColor
         attrubutedString.font = style.font
+        
         return attrubutedString
     }
     
-}
-
-extension SectionType {
-    
-    var paragraphStyle: NSMutableParagraphStyle {
-        let style = NSMutableParagraphStyle()
-        switch self {
-        case .blockquote:
-            style.firstLineHeadIndent = 20
-            style.headIndent = 20
-        case .codeBlock,
-                .alternateCodeBlock:
-            style.firstLineHeadIndent = 20
-        case .unorderedList,
-                .orderedList:
-            style.tabStops = [NSTextTab(textAlignment: .left, location: 30, options: [:]), NSTextTab(textAlignment: .left, location: 30, options: [:])]
-            style.defaultTabInterval = 30
-            style.headIndent = 30
-        default: break
-        }
-        return style
-    }
 }

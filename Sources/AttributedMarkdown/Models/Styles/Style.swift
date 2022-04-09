@@ -17,9 +17,9 @@ public enum Alignment {
 public struct Style {
     let font: Font
     let fontColor: Color
-    let backgroundColor: Color
-    let alignment: Alignment
-    let type: SectionType
+    private(set) var backgroundColor: Color = .clear
+    private(set) var alignment: Alignment = .leading
+    private(set) var paragraphStyle: NSMutableParagraphStyle = .init()
     
-    static let body: Style = .init(font: .body, fontColor: .white, backgroundColor: .clear, alignment: .leading, type: .body)
+    static let body: Style = .init(font: .body, fontColor: .white, backgroundColor: .clear, alignment: .leading, paragraphStyle: .init())
 }
