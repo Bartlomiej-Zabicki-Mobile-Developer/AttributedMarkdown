@@ -26,13 +26,14 @@ enum SectionType: CaseIterable, Equatable {
     case italic
     case image
     case link
+    case paragraph
 }
 
 extension SectionType {
     
     var isInLine: Bool {
         switch self {
-        case .bold, .italic, .link: return true
+        case .bold, .italic, .link, .body: return true
         default: return false
         }
     }

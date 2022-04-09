@@ -25,35 +25,41 @@ struct AttributedStringVisitor: MarkupVisitor {
     // MARK: - MarkupVisitor
     
     func defaultVisit(_ markup: Markup) -> AttributedString {
-        return formatted(string: markup.format(), forMarkup: markup.parent)
+        return formatted(content: markup.format(), markupStyle: markup.parent ?? markup)
     }
     
-    func formatted(string: String, forMarkup markup: Markup?) -> AttributedString {
-        guard let markup = markup else {
-            return .init()
-        }
-        let keyPath = styleFor(markup: markup)
-        return string.asAttributedString(withStyle: keyPath, in: styles)
+    func formatted(content: String, markupStyle: Markup) -> AttributedString {
+        let keyPath = styleFor(markup: markupStyle)
+        return asAttributedString(content: content, style: styles[keyPath: keyPath] as! Style, andParent: markupStyle)
     }
     
     public mutating func visit(_ markup: Markup) -> Result {
-        let newChildren = markup.children.compactMap { child -> AttributedString in
-            if child is Markdown.Text {
-                return child.accept(&self)
-            } else {
-                return visit(child)
+        if markup.childCount > 0 {
+            let newChildren = markup.children.compactMap { child -> AttributedString in
+                if child is Markdown.Text {
+                    let newChild = child.accept(&self)
+                    return newChild
+                } else {
+                    return visit(child)
+                }
             }
-        }
-        
-        return newChildren.reduce(into: AttributedString()) { partialResult, attributed in
-            partialResult.append(attributed)
+            
+            var newResult = newChildren.reduce(into: AttributedString()) { partialResult, attributed in
+                partialResult.append(attributed)
+            }
+            if markup.parent?.isIdentical(to: markup.root) == true {
+                return newResult + .init("\n")
+            }
+            return newResult
+        } else {
+            return markup.accept(&self)
         }
     }
     public mutating func visitBlockQuote(_ blockQuote: BlockQuote) -> Result {
         return defaultVisit(blockQuote)
     }
     public mutating func visitCodeBlock(_ codeBlock: CodeBlock) -> Result {
-        return defaultVisit(codeBlock)
+        return formatted(content: codeBlock.code, markupStyle: codeBlock)
     }
     public mutating func visitCustomBlock(_ customBlock: CustomBlock) -> Result {
         return defaultVisit(customBlock)
@@ -104,7 +110,7 @@ struct AttributedStringVisitor: MarkupVisitor {
         return defaultVisit(lineBreak)
     }
     public mutating func visitLink(_ link: Markdown.Link) -> Result {
-        return defaultVisit(link)
+        return formatted(content: link.plainText, markupStyle: link)
     }
     public mutating func visitSoftBreak(_ softBreak: SoftBreak) -> Result {
         return defaultVisit(softBreak)
@@ -139,6 +145,25 @@ struct AttributedStringVisitor: MarkupVisitor {
     
     // MARK: - Private implementation
     
+    private func asAttributedString(content: String,
+                                    style: Style,
+                                    andParent parent: Markup) -> AttributedString {
+        let rawSource = content
+        var attrubutedString = AttributedString(rawSource)
+        let container = AttributeContainer([
+            .paragraphStyle: style.paragraphStyle
+        ])
+        attrubutedString.setAttributes(container)
+        if let link = parent as? Markdown.Link, let destination = link.destination {
+            attrubutedString.link = .init(string: destination)
+        }
+        attrubutedString.backgroundColor = style.backgroundColor
+        attrubutedString.foregroundColor = style.fontColor
+        attrubutedString.font = style.font
+        
+        return attrubutedString
+    }
+    
     private func styleFor(markup: Markup) -> AnyKeyPath {
         switch markup {
         case is Heading:
@@ -151,28 +176,13 @@ struct AttributedStringVisitor: MarkupVisitor {
             return \SectionStyles.link
         case is Markdown.BlockQuote:
             return \SectionStyles.blockquote
+        case is Paragraph:
+            return \SectionStyles.paragraph
+        case is CodeBlock:
+            return \SectionStyles.codeBlock
         default:
             return \SectionStyles.body
         }
-    }
-    
-}
-
-extension String {
-    
-    func asAttributedString(withStyle styleKeyPath: AnyKeyPath, in styles: SectionStyles) -> AttributedString {
-        let style = styles[keyPath: styleKeyPath] as! Style
-        let rawSource = styles.sectionType(for: styleKeyPath).isInLine ? self : self.appending("\n")
-        var attrubutedString = AttributedString(rawSource)
-        let container = AttributeContainer([
-            .paragraphStyle: style.paragraphStyle
-        ])
-        attrubutedString.setAttributes(container)
-        attrubutedString.backgroundColor = style.backgroundColor
-        attrubutedString.foregroundColor = style.fontColor
-        attrubutedString.font = style.font
-        
-        return attrubutedString
     }
     
 }

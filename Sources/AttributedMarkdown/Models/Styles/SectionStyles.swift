@@ -35,13 +35,14 @@ public struct SectionStyles {
     var h6: Style = .init(font: .subheadline, fontColor: .white, backgroundColor: .clear, alignment: .leading)
     var body: Style = .body
     var blockquote: Style = .init(font: .body, fontColor: .red, backgroundColor: .white, alignment: .leading, paragraphStyle: .init())
-    var codeBlock: Style = .init(font: .body.italic(), fontColor: .white, backgroundColor: .clear, alignment: .leading)
+    var codeBlock: Style = .init(font: .body.italic(), fontColor: .yellow, backgroundColor: .clear, alignment: .leading)
     var unorderedList: Style = .body
     var orderedList: Style = .body
-    var link: Style = .body
+    var link: Style = .init(font: .body, fontColor: .blue, backgroundColor: .white, alignment: .leading, paragraphStyle: .init())
     var image: AttachmentStyle = .init(alignment: .center)
     var bold: Style = .init(font: .body.bold(), fontColor: .white, backgroundColor: .clear, alignment: .leading)
     var italic: Style = .init(font: .body.italic(), fontColor: .white, backgroundColor: .clear, alignment: .leading)
+    var paragraph: Style = .body
     
     func sectionType(for style: AnyKeyPath) -> SectionType {
         switch style {
@@ -60,6 +61,7 @@ public struct SectionStyles {
         case \Self.image: return .image
         case \Self.bold: return .bold
         case \Self.italic: return .italic
+        case \Self.paragraph: return .paragraph
         default: return .body
         }
     }
