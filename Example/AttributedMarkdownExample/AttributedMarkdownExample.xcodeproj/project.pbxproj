@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC68538F2801EA37007A95ED /* AttributedMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = CC68538E2801EA37007A95ED /* AttributedMarkdown */; };
+		CC6853912801EA3D007A95ED /* AttributedMarkdown in Frameworks */ = {isa = PBXBuildFile; productRef = CC6853902801EA3D007A95ED /* AttributedMarkdown */; };
 		CCAA978027A855ED004B368F /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCAA977F27A855ED004B368F /* ContentViewModel.swift */; };
 		CCAA978127A85631004B368F /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB48223279DB62300065590 /* ContentView.swift */; };
 		CCAA978227A85634004B368F /* ContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCAA977F27A855ED004B368F /* ContentViewModel.swift */; };
@@ -30,6 +32,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CC68538D2801EA27007A95ED /* AttributedMarkdown */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = AttributedMarkdown; path = ../..; sourceTree = "<group>"; };
 		CCAA977F27A855ED004B368F /* ContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentViewModel.swift; sourceTree = "<group>"; };
 		CCAA978627A85898004B368F /* file1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = file1.json; sourceTree = "<group>"; };
 		CCAA978727A85898004B368F /* file6.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = file6.json; sourceTree = "<group>"; };
@@ -50,6 +53,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC6853912801EA3D007A95ED /* AttributedMarkdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,6 +61,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC68538F2801EA37007A95ED /* AttributedMarkdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -103,6 +108,7 @@
 		CCB4821C279DB62300065590 = {
 			isa = PBXGroup;
 			children = (
+				CC68538D2801EA27007A95ED /* AttributedMarkdown */,
 				CCB48221279DB62300065590 /* Shared */,
 				CCB48230279DB62500065590 /* macOS */,
 				CCB4822A279DB62400065590 /* Products */,
@@ -155,6 +161,7 @@
 			);
 			name = "AttributedMarkdownExample (iOS)";
 			packageProductDependencies = (
+				CC6853902801EA3D007A95ED /* AttributedMarkdown */,
 			);
 			productName = "AttributedMarkdownExample (iOS)";
 			productReference = CCB48229279DB62400065590 /* AttributedMarkdownExample.app */;
@@ -173,6 +180,9 @@
 			dependencies = (
 			);
 			name = "AttributedMarkdownExample (macOS)";
+			packageProductDependencies = (
+				CC68538E2801EA37007A95ED /* AttributedMarkdown */,
+			);
 			productName = "AttributedMarkdownExample (macOS)";
 			productReference = CCB4822F279DB62500065590 /* AttributedMarkdownExample.app */;
 			productType = "com.apple.product-type.application";
@@ -320,6 +330,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -373,6 +385,8 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MACOSX_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -528,6 +542,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		CC68538E2801EA37007A95ED /* AttributedMarkdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AttributedMarkdown;
+		};
+		CC6853902801EA3D007A95ED /* AttributedMarkdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AttributedMarkdown;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CCB4821D279DB62300065590 /* Project object */;
 }

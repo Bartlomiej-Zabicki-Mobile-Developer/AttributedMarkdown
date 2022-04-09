@@ -14,13 +14,27 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            Picker("All demo files", selection: $viewModel.selectedIndex) {
+            Text("Demo files")
+            Picker("", selection: $viewModel.selectedIndex) {
                 ForEach(ViewModel.File.allCases) {
-                    Text($0.rawValue).tag($0.id)
+                    Text($0.rawValue)
+                        .tag($0.id)
                 }
             }
+            .onChange(of: viewModel.selectedIndex, perform: { newValue in
+                Task {
+                    await viewModel.selectFile(file: .init(from: newValue))
+                }
+             })
             .pickerStyle(.segmented)
-            Text(viewModel.curentFileContent)
+            ScrollView {
+                Text(viewModel.curentFileContent)
+            }
+        }
+        .onAppear {
+            Task {
+                await viewModel.selectFile(file: .file1)
+            }
         }
     }
 }

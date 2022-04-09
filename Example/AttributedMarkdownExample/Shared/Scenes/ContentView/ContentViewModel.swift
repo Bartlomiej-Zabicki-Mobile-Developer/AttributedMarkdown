@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import AttributedMarkdown
 
 struct MercuryFile: Codable {
     let title: String
@@ -51,10 +52,12 @@ extension ContentView {
         @Published var curentFileContent: AttributedString = .init()
         private lazy var attributedMarkdownParser = AttributedMarkdownParser(configuration: .default)
         
+        
+        
         func fetchAllFiles() async {
             do {
                 let mercuryFile1 = try await fetchFile(file: .file1)
-                let newContent = attributedMarkdownParser.parse(markdown: mercuryFile1.content)
+                let newContent = try await attributedMarkdownParser.parse(markdown: mercuryFile1.content)
                 curentFileContent = newContent
             } catch {
                 print("Fetch error: \(error)")
@@ -69,6 +72,31 @@ extension ContentView {
             return try JSONDecoder().decode(MercuryFile.self, from: data)
         }
         
+        func selectFile(file: File) async {
+            do {
+                let mercuryFile = try await fetchFile(file: file)
+                let newContent = try await attributedMarkdownParser.parse(markdown: mercuryFile.content)
+                curentFileContent = newContent
+            } catch {
+                print("Fetch error: \(error)")
+            }
+        }
+        
+    }
+    
+}
+
+extension ContentView.ViewModel.File {
+    
+    init(from: Int) {
+        switch from {
+        case 0: self = .file1
+        case 1: self = .file2
+        case 2: self = .file3
+        case 3: self = .file4
+        case 4: self = .file5
+        default: self = .file6
+        }
     }
     
 }
