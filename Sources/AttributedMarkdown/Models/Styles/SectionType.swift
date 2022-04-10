@@ -14,12 +14,9 @@ enum SectionType: CaseIterable, Equatable {
     case h3
     case h2
     case h1
-    case alternateH1
-    case alternateH2
     case body
     case blockquote
     case codeBlock
-    case alternateCodeBlock
     case unorderedList
     case orderedList
     case bold
@@ -35,6 +32,43 @@ extension SectionType {
         switch self {
         case .bold, .italic, .link, .body: return true
         default: return false
+        }
+    }
+    
+    var defaultFontSize: CGFloat {
+        switch self {
+        case .h6:
+            return 10
+        case .h5:
+            return 12
+        case .h4:
+            return 14
+        case .h3:
+            return 16
+        case .h2:
+            return 18
+        case .h1:
+            return 20
+        case .body:
+            return 12
+        case .blockquote:
+            return 12
+        case .codeBlock:
+            return 10
+        case .unorderedList:
+            return 12
+        case .orderedList:
+            return 12
+        case .bold:
+            return 12
+        case .italic:
+            return 12
+        case .image:
+            return 8
+        case .link:
+            return 12
+        case .paragraph:
+            return 12
         }
     }
     

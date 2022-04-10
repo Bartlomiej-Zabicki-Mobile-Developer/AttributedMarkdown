@@ -49,7 +49,7 @@ extension ContentView {
         }
         
         @Published var selectedIndex: Int = 0
-        @Published var curentFileContent: AttributedString = .init()
+        @Published var curentFileContent: NSMutableAttributedString = .init()
         private lazy var attributedMarkdownParser = AttributedMarkdownParser(configuration: .default)
         
         
@@ -72,6 +72,7 @@ extension ContentView {
             return try JSONDecoder().decode(MercuryFile.self, from: data)
         }
         
+        @MainActor
         func selectFile(file: File) async {
             do {
                 let mercuryFile = try await fetchFile(file: file)

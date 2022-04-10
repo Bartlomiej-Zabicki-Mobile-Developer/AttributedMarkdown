@@ -14,6 +14,8 @@ public enum Alignment {
     case center
 }
 
+
+#if os(iOS)
 public struct Style {
     let font: Font
     let fontColor: Color
@@ -21,5 +23,26 @@ public struct Style {
     private(set) var alignment: Alignment = .leading
     private(set) var paragraphStyle: NSMutableParagraphStyle = .init()
     
-    static let body: Style = .init(font: .body, fontColor: .white, backgroundColor: .clear, alignment: .leading, paragraphStyle: .init())
+    static let body: Style = .init(font: .systemFont(ofSize: SectionType.body.defaultFontSize),
+                                   fontColor: .white,
+                                   backgroundColor: .clear,
+                                   alignment: .leading,
+                                   paragraphStyle: .init())
 }
+#endif
+
+#if os(macOS)
+public struct Style {
+    let font: NSFont
+    let fontColor: NSColor
+    private(set) var backgroundColor: NSColor = .clear
+    private(set) var alignment: Alignment = .leading
+    private(set) var paragraphStyle: NSMutableParagraphStyle = .init()
+    
+    static let body: Style = .init(font: .systemFont(ofSize: SectionType.body.defaultFontSize),
+                                   fontColor: .white,
+                                   backgroundColor: .clear,
+                                   alignment: .leading,
+                                   paragraphStyle: .init())
+}
+#endif

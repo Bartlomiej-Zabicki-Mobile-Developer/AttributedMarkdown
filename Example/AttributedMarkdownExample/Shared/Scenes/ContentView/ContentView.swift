@@ -11,7 +11,6 @@ struct ContentView: View {
     
     @StateObject var viewModel: ViewModel = .init()
     
-    
     var body: some View {
         VStack {
             Text("Demo files")
@@ -28,7 +27,8 @@ struct ContentView: View {
              })
             .pickerStyle(.segmented)
             ScrollView {
-                Text(viewModel.curentFileContent)
+                CustomTextView(attr: viewModel.curentFileContent)
+                .frame(idealHeight: 10000)
             }
         }
         .onAppear {
@@ -44,3 +44,50 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+#if os(iOS)
+struct CustomTextView: UIViewRepresentable {
+    typealias NSViewType = UITextView
+    let attr: NSAttributedString
+    func makeUIView(context: Context) -> UITextView {
+        let view = UITextView()
+        view.isEditable = false
+        view.isSelectable = false
+//        view.isScrollEnabled = false
+        view.attributedText = NSAttributedString(attr)
+        return view
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        let uiattr =  NSAttributedString(attr)
+        if uiView.attributedText == nil || uiattr != uiView.attributedText! {
+            uiView.attributedText = uiattr
+        }
+    }
+    
+}
+#endif
+#if os(macOS)
+struct CustomTextView: NSViewRepresentable {
+    typealias NSViewType = NSTextView
+    let attr: NSAttributedString
+//    var nsAttributedString: NSAttributedString {
+//        .init(attr)
+//    }
+    func makeNSView(context: Context) -> NSTextView {
+        let view = NSTextView()
+        view.isEditable = false
+        view.isSelectable = true
+        view.isRichText = false
+//        view.textContainer?.widthTracksTextView = false
+        view.textStorage?.setAttributedString(attr)
+        return view
+    }
+
+    func updateNSView(_ nsView: NSTextView, context: Context) {
+//        if nsView.attributedString() == .init() {
+            nsView.textStorage?.setAttributedString(attr)
+//        }
+    }
+
+}
+#endif

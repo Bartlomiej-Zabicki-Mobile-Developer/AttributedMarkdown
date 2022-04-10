@@ -15,7 +15,7 @@ public final class AttributedMarkdownParser {
     
     // MARK: - Functions
     
-    public func parse(markdown: String) async throws -> AttributedString {
+    public func parse(markdown: String) async throws -> NSMutableAttributedString {
         var document = Document(parsing: markdown)
         var imagesWalker = ImagesWalker()
         imagesWalker.visit(document)
@@ -44,15 +44,7 @@ public final class AttributedMarkdownParser {
                 taskGroup.addTask {
                     let (data, _) = try await URLSession.shared.data(from: url)
                     if let targetURL = self.configuration.imagesHandler.urlToSave(remoteURL: url) {
-                        print("TargetURL: \(targetURL)")
-                        do {
-                            print("Saving file to: \(targetURL)")
-                            FileManager.default.createFile(atPath: targetURL.path, contents: data)
-//                            try data.write(to: targetURL)
-                        } catch {
-                            print("Save error: \(error)")
-                        }
-                        print("File exists: \(FileManager.default.fileExists(atPath: targetURL.path))")
+                        FileManager.default.createFile(atPath: targetURL.path, contents: data)
                         return .init(remoteURL: url, localURL: targetURL)
                     }
                     return .init(remoteURL: url, localURL: nil)

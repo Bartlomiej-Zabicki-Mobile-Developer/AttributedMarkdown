@@ -10,7 +10,7 @@ import SwiftUI
 
 struct AttributedStringVisitor: MarkupVisitor {
     
-    typealias Result = AttributedString
+    typealias Result = NSMutableAttributedString
     
     // MARK: - Properties
     
@@ -24,18 +24,18 @@ struct AttributedStringVisitor: MarkupVisitor {
     
     // MARK: - MarkupVisitor
     
-    func defaultVisit(_ markup: Markup) -> AttributedString {
+    func defaultVisit(_ markup: Markup) -> Result {
         return formatted(content: markup.format(), markupStyle: markup.parent ?? markup)
     }
     
-    func formatted(content: String, markupStyle: Markup) -> AttributedString {
+    func formatted(content: String, markupStyle: Markup) -> Result {
         let keyPath = styleFor(markup: markupStyle)
         return asAttributedString(content: content, style: styles[keyPath: keyPath] as! Style, andParent: markupStyle)
     }
     
     public mutating func visit(_ markup: Markup) -> Result {
         if markup.childCount > 0 {
-            let newChildren = markup.children.compactMap { child -> AttributedString in
+            let newChildren = markup.children.compactMap { child -> Result in
                 if child is Markdown.Text {
                     let newChild = child.accept(&self)
                     return newChild
@@ -44,15 +44,17 @@ struct AttributedStringVisitor: MarkupVisitor {
                 }
             }
             
-            var newResult = newChildren.reduce(into: AttributedString()) { partialResult, attributed in
+            var newResult = newChildren.reduce(into: NSMutableAttributedString()) { partialResult, attributed in
                 partialResult.append(attributed)
             }
 //            if markup is Markdown.Paragraph || markup is Markdown.Text {
-            if let missingPrefix = markup.format().components(separatedBy: String(newChildren[0].characters)).first {
-                newResult = .init(missingPrefix) + newResult
+            if let missingPrefix = markup.format().components(separatedBy: String(newChildren[0].string)).first {
+                var attributed = NSMutableAttributedString(string: missingPrefix)
+                attributed.append(newResult)
+                newResult = attributed
             }
-            if let missingSuffix = markup.format().components(separatedBy: String(newChildren[newChildren.count - 1].characters)).last {
-                newResult += .init(missingSuffix)
+            if let missingSuffix = markup.format().components(separatedBy: String(newChildren[newChildren.count - 1].string)).last {
+                newResult.append(.init(string: missingSuffix))
             }
 //            }
             
@@ -153,29 +155,22 @@ struct AttributedStringVisitor: MarkupVisitor {
     
     private func asAttributedString(content: String,
                                     style: Style,
-                                    andParent parent: Markup) -> AttributedString {
+                                    andParent parent: Markup) -> Result {
         let rawSource = content
-        var attrubutedString = AttributedString(rawSource)
-        let container = AttributeContainer([
-            .paragraphStyle: style.paragraphStyle
+        var attrubutedString = NSMutableAttributedString(string: rawSource, attributes: [
+            .foregroundColor: style.fontColor,
+            .backgroundColor: style.backgroundColor,
+            .font: style.font,
+            .paragraphStyle: style.paragraphStyle,
         ])
-        attrubutedString.setAttributes(container)
-        if let link = parent as? Markdown.Link, let destination = link.destination {
-            attrubutedString.link = .init(string: destination)
+        if let link = parent as? Markdown.Link, let destination = link.destination, let url = URL(string: destination) {
+            attrubutedString.addAttribute(.link, value: url, range: .init(location: 0, length: rawSource.count))
         } else if let image = parent as? Markdown.Image, let imageSource = image.source {
             let data = try? Data(contentsOf: .init(fileURLWithPath: imageSource))
-            attrubutedString.imageURL = URL(fileURLWithPath: imageSource)
-            attrubutedString.attachment = .init(data: data, ofType: nil)
-            let image1Attachment = NSTextAttachment()
-            let image = NSImage(data: data!)
-            image1Attachment.image = image
-            attrubutedString.attachment?.image = image
-            print("Attachment")
+            if let attachment = createAttachment(for: data) {
+                attrubutedString = .init(attachment: attachment)
+            }
         }
-        attrubutedString.backgroundColor = style.backgroundColor
-        attrubutedString.foregroundColor = style.fontColor
-        attrubutedString.font = style.font
-        
         return attrubutedString
     }
     
@@ -199,5 +194,21 @@ struct AttributedStringVisitor: MarkupVisitor {
             return \SectionStyles.body
         }
     }
+    
+#if os(iOS)
+    private func createAttachment(for data: Data?) -> NSTextAttachment? {
+        guard let data = data, let image = UIImage(data: data) else { return nil }
+        return NSTextAttachment(image: image)
+    }
+#endif
+    
+#if os(macOS)
+    private func createAttachment(for data: Data?) -> NSTextAttachment? {
+        guard let data = data, let image = NSImage(data: data) else { return nil }
+        let attachment = NSTextAttachment()
+        attachment.image = image
+        return attachment
+    }
+#endif
     
 }
