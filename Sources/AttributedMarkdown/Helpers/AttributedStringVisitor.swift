@@ -47,9 +47,15 @@ struct AttributedStringVisitor: MarkupVisitor {
             var newResult = newChildren.reduce(into: AttributedString()) { partialResult, attributed in
                 partialResult.append(attributed)
             }
-            if markup.parent?.isIdentical(to: markup.root) == true {
-                return newResult + .init("\n")
+//            if markup is Markdown.Paragraph || markup is Markdown.Text {
+            if let missingPrefix = markup.format().components(separatedBy: String(newChildren[0].characters)).first {
+                newResult = .init(missingPrefix) + newResult
             }
+            if let missingSuffix = markup.format().components(separatedBy: String(newChildren[newChildren.count - 1].characters)).last {
+                newResult += .init(missingSuffix)
+            }
+//            }
+            
             return newResult
         } else {
             return markup.accept(&self)
@@ -68,7 +74,7 @@ struct AttributedStringVisitor: MarkupVisitor {
         return defaultVisit(document)
     }
     public mutating func visitHeading(_ heading: Heading) -> Result {
-        return defaultVisit(heading)
+        return formatted(content: heading.plainText, markupStyle: heading)
     }
     public mutating func visitThematicBreak(_ thematicBreak: ThematicBreak) -> Result {
         return defaultVisit(thematicBreak)
@@ -86,28 +92,28 @@ struct AttributedStringVisitor: MarkupVisitor {
         return defaultVisit(unorderedList)
     }
     public mutating func visitParagraph(_ paragraph: Paragraph) -> Result {
-        return defaultVisit(paragraph)
+        return formatted(content: paragraph.plainText, markupStyle: paragraph)
     }
     public mutating func visitBlockDirective(_ blockDirective: BlockDirective) -> Result {
         return defaultVisit(blockDirective)
     }
     public mutating func visitInlineCode(_ inlineCode: InlineCode) -> Result {
-        return defaultVisit(inlineCode)
+        return formatted(content: inlineCode.code, markupStyle: inlineCode)
     }
     public mutating func visitCustomInline(_ customInline: CustomInline) -> Result {
         return defaultVisit(customInline)
     }
     public mutating func visitEmphasis(_ emphasis: Emphasis) -> Result {
-        return defaultVisit(emphasis)
+        return formatted(content: emphasis.plainText, markupStyle: emphasis)
     }
     public mutating func visitImage(_ image: Markdown.Image) -> Result {
-        return defaultVisit(image)
+        return formatted(content: image.plainText, markupStyle: image)
     }
     public mutating func visitInlineHTML(_ inlineHTML: InlineHTML) -> Result {
         return defaultVisit(inlineHTML)
     }
     public mutating func visitLineBreak(_ lineBreak: LineBreak) -> Result {
-        return defaultVisit(lineBreak)
+        return formatted(content: lineBreak.plainText, markupStyle: lineBreak)
     }
     public mutating func visitLink(_ link: Markdown.Link) -> Result {
         return formatted(content: link.plainText, markupStyle: link)
@@ -116,7 +122,7 @@ struct AttributedStringVisitor: MarkupVisitor {
         return defaultVisit(softBreak)
     }
     public mutating func visitStrong(_ strong: Strong) -> Result {
-        return defaultVisit(strong)
+        return formatted(content: strong.plainText, markupStyle: strong)
     }
     public mutating func visitText(_ text: Markdown.Text) -> Result {
         return defaultVisit(text)
@@ -156,6 +162,15 @@ struct AttributedStringVisitor: MarkupVisitor {
         attrubutedString.setAttributes(container)
         if let link = parent as? Markdown.Link, let destination = link.destination {
             attrubutedString.link = .init(string: destination)
+        } else if let image = parent as? Markdown.Image, let imageSource = image.source {
+            let data = try? Data(contentsOf: .init(fileURLWithPath: imageSource))
+            attrubutedString.imageURL = URL(fileURLWithPath: imageSource)
+            attrubutedString.attachment = .init(data: data, ofType: nil)
+            let image1Attachment = NSTextAttachment()
+            let image = NSImage(data: data!)
+            image1Attachment.image = image
+            attrubutedString.attachment?.image = image
+            print("Attachment")
         }
         attrubutedString.backgroundColor = style.backgroundColor
         attrubutedString.foregroundColor = style.fontColor
