@@ -48,15 +48,27 @@ struct AttributedStringVisitor: MarkupVisitor {
                 partialResult.append(attributed)
             }
 //            if markup is Markdown.Paragraph || markup is Markdown.Text {
-            if let missingPrefix = markup.format().components(separatedBy: String(newChildren[0].string)).first {
-                var attributed = NSMutableAttributedString(string: missingPrefix)
-                attributed.append(newResult)
-                newResult = attributed
+            if let firstChild = markup.children.first(where: { !$0.format().isEmpty }),
+               let missingPrefixCount = markup.format().components(separatedBy: firstChild.format()).first?.filter({ $0.isNewline }).count,
+               missingPrefixCount > 0 {
+//                let attributed = NSMutableAttributedString(string: "\n")
+//                attributed.append(newResult)
+//                newResult = attributed
             }
-            if let missingSuffix = markup.format().components(separatedBy: String(newChildren[newChildren.count - 1].string)).last {
-                newResult.append(.init(string: missingSuffix))
+            if let lastChild = markup.children.filter({ !$0.format().isEmpty }).last,
+               let missingSuffixCount = markup.format().components(separatedBy: lastChild.format()).last?.filter({ $0.isNewline }).count,
+                missingSuffixCount > 0 {
+//                newResult.append(.init(string: "\n"))
             }
 //            }
+            
+            let isLastElementInParent: Bool = {
+                guard let parent = markup.parent else { return false }
+                return markup.indexInParent == parent.childCount - 1
+            }()
+            if markup is Markdown.Paragraph || markup is Heading || isLastElementInParent {
+                newResult.append(.init("\n"))
+            }
             
             return newResult
         } else {
@@ -167,8 +179,17 @@ struct AttributedStringVisitor: MarkupVisitor {
             attrubutedString.addAttribute(.link, value: url, range: .init(location: 0, length: rawSource.count))
         } else if let image = parent as? Markdown.Image, let imageSource = image.source {
             let data = try? Data(contentsOf: .init(fileURLWithPath: imageSource))
+            let paragraphStyle = NSMutableParagraphStyle()
+            paragraphStyle.alignment = .center
             if let attachment = createAttachment(for: data) {
                 attrubutedString = .init(attachment: attachment)
+                attrubutedString.addAttributes(
+                    [
+                        .paragraphStyle: paragraphStyle
+                    ],
+                    range: .init(location: 0, length: 1)
+                )
+                
             }
         }
         return attrubutedString
@@ -198,17 +219,104 @@ struct AttributedStringVisitor: MarkupVisitor {
 #if os(iOS)
     private func createAttachment(for data: Data?) -> NSTextAttachment? {
         guard let data = data, let image = UIImage(data: data) else { return nil }
-        return NSTextAttachment(image: image)
+        let configuration = ImageAttachment.Configuration(maxWidthPercentage: 80)
+        let attachment = ImageAttachment(configuration: configuration)
+        attachment.image = image
+        return attachment
     }
 #endif
     
 #if os(macOS)
     private func createAttachment(for data: Data?) -> NSTextAttachment? {
         guard let data = data, let image = NSImage(data: data) else { return nil }
-        let attachment = NSTextAttachment()
+        let configuration = ImageAttachment.Configuration(maxWidthPercentage: 70)
+        let attachment = ImageAttachment(configuration: configuration)
         attachment.image = image
         return attachment
     }
 #endif
+    
+}
+
+public final class ImageAttachment: NSTextAttachment {
+    
+    public enum ImageAlignment {
+        case left
+        case right
+        case center
+    }
+    
+    public struct Configuration {
+        var maxWidthPercentage: CGFloat = 100
+    }
+    
+    private struct ImageSize {
+        let width: CGFloat
+        let height: CGFloat
+    }
+    
+    private struct AlignmentPosition {
+        let x: CGFloat
+        let y: CGFloat
+        let width: CGFloat
+        let height: CGFloat
+    }
+    
+    // MARK: - Properties
+    
+    private(set) var configuration: Configuration!
+    
+    // MARK: - Initialization
+    
+    public override init(data contentData: Data?, ofType uti: String?) {
+        super.init(data: contentData, ofType: uti)
+    }
+    
+    public required init?(coder: NSCoder) {
+        fatalError("Please use constructor with configuration")
+    }
+    
+    init(configuration: Configuration) {
+        self.configuration = configuration
+        super.init(data: nil, ofType: nil)
+    }
+    
+    // MARK: - Public implementation
+    
+#if os(iOS)
+    public override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: CGRect, glyphPosition position: CGPoint, characterIndex charIndex: Int) -> CGRect {
+        guard let image = self.image else {
+            return super.attachmentBounds(for: textContainer,proposedLineFragment: lineFrag, glyphPosition: position, characterIndex: charIndex)
+        }
+        
+        let containerWidth = min(lineFrag.width, image.size.width)
+        let alignmentPosition = calculateAlignmentPosition(for: .init(width: image.size.width, height: image.size.height), in: containerWidth)
+        return CGRect(x: alignmentPosition.x, y: alignmentPosition.y, width: alignmentPosition.width, height: alignmentPosition.height)
+    }
+#endif
+    
+#if os(macOS)
+    public override func attachmentBounds(for textContainer: NSTextContainer?, proposedLineFragment lineFrag: NSRect, glyphPosition position: CGPoint, characterIndex charIndex: Int) -> NSRect {
+        guard let image = self.image else {
+            return super.attachmentBounds(for: textContainer,proposedLineFragment: lineFrag, glyphPosition: position, characterIndex: charIndex)
+        }
+        
+        let containerWidth = min(lineFrag.width, image.size.width)
+        let alignmentPosition = calculateAlignmentPosition(for: .init(width: image.size.width, height: image.size.height), in: containerWidth)
+        return NSRect(x: alignmentPosition.x, y: alignmentPosition.y, width: alignmentPosition.width, height: alignmentPosition.height)
+  }
+#endif
+    
+    // MARK: - Private implementation
+    
+    private func calculateAlignmentPosition(for imageSize: ImageSize, in containerWidth: CGFloat) -> AlignmentPosition {
+        
+        let aspectRatio = imageSize.width / imageSize.height
+        //Check for percentage
+        let imageWidth: CGFloat = min(containerWidth, containerWidth*configuration.maxWidthPercentage/100)
+        let imageHeight: CGFloat = imageWidth / aspectRatio
+        
+        return .init(x: 0, y: 0, width: imageWidth, height: imageHeight)
+    }
     
 }
