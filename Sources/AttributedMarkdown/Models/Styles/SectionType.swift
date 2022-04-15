@@ -50,25 +50,25 @@ extension SectionType {
         case .h1:
             return 20
         case .body:
-            return 12
+            return 16
         case .blockquote:
-            return 12
+            return 16
         case .codeBlock:
-            return 10
+            return 16
         case .unorderedList:
-            return 12
+            return 14
         case .orderedList:
-            return 12
+            return 16
         case .bold:
-            return 12
+            return 16
         case .italic:
-            return 12
+            return 16
         case .image:
             return 8
         case .link:
-            return 12
+            return 16
         case .paragraph:
-            return 12
+            return 16
         }
     }
     

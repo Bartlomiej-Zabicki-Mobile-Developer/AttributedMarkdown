@@ -9,4 +9,5 @@ import Foundation
 
 struct AttachmentStyle {
     let alignment: Alignment
+    
 }

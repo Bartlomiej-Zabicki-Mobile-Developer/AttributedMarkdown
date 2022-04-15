@@ -52,7 +52,7 @@ extension ContentView {
         @Published var curentFileContent: NSMutableAttributedString = .init()
         private lazy var attributedMarkdownParser = AttributedMarkdownParser(configuration: .default)
         
-        
+        // MARK: - Public impementation
         
         func fetchAllFiles() async {
             do {
@@ -64,14 +64,6 @@ extension ContentView {
             }
         }
         
-        func fetchFile(file: File) async throws -> MercuryFile {
-            guard  let path = Bundle.main.path(forResource: file.rawValue, ofType: "json") else {
-                throw Error.noSuchFile
-            }
-            let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
-            return try JSONDecoder().decode(MercuryFile.self, from: data)
-        }
-        
         @MainActor
         func selectFile(file: File) async {
             do {
@@ -81,6 +73,16 @@ extension ContentView {
             } catch {
                 print("Fetch error: \(error)")
             }
+        }
+        
+        // MARK: - Private implementation
+        
+        private func fetchFile(file: File) async throws -> MercuryFile {
+            guard  let path = Bundle.main.path(forResource: file.rawValue, ofType: "json") else {
+                throw Error.noSuchFile
+            }
+            let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
+            return try JSONDecoder().decode(MercuryFile.self, from: data)
         }
         
     }
@@ -99,5 +101,14 @@ extension ContentView.ViewModel.File {
         default: self = .file6
         }
     }
+    
+}
+
+private extension ContentView.ViewModel {
+    
+    #if os(macOS)
+    
+    #endif
+    
     
 }

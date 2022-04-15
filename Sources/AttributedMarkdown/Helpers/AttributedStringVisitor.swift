@@ -169,18 +169,21 @@ struct AttributedStringVisitor: MarkupVisitor {
                                     style: Style,
                                     andParent parent: Markup) -> Result {
         let rawSource = content
+        let paragraphStyle = style.paragraphStyle
+        paragraphStyle.paragraphSpacing = 10
+        paragraphStyle.paragraphSpacingBefore = 10
+        paragraphStyle.paragraphSpacing = 4
         var attrubutedString = NSMutableAttributedString(string: rawSource, attributes: [
             .foregroundColor: style.fontColor,
             .backgroundColor: style.backgroundColor,
             .font: style.font,
-            .paragraphStyle: style.paragraphStyle,
+            .paragraphStyle: paragraphStyle,
         ])
         if let link = parent as? Markdown.Link, let destination = link.destination, let url = URL(string: destination) {
             attrubutedString.addAttribute(.link, value: url, range: .init(location: 0, length: rawSource.count))
         } else if let image = parent as? Markdown.Image, let imageSource = image.source {
             let data = try? Data(contentsOf: .init(fileURLWithPath: imageSource))
-            let paragraphStyle = NSMutableParagraphStyle()
-            paragraphStyle.alignment = .center
+            let paragraphStyle = style.paragraphStyle
             if let attachment = createAttachment(for: data) {
                 attrubutedString = .init(attachment: attachment)
                 attrubutedString.addAttributes(

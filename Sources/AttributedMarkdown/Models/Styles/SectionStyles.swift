@@ -31,18 +31,28 @@ public struct SectionStyles {
     var h1: Style = .init(font: .systemFont(ofSize: SectionType.h1.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
     var h2: Style = .init(font: .systemFont(ofSize: SectionType.h2.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
     var h3: Style = .init(font: .systemFont(ofSize: SectionType.h3.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
-    var h4: Style = .init(font: .systemFont(ofSize: SectionType.h4.defaultFontSize), fontColor: .gray, backgroundColor: .clear, alignment: .leading)
-    var h5: Style = .init(font: .systemFont(ofSize: SectionType.h5.defaultFontSize), fontColor: .gray, backgroundColor: .clear, alignment: .leading)
-    var h6: Style = .init(font: .systemFont(ofSize: SectionType.h6.defaultFontSize), fontColor: .gray, backgroundColor: .clear, alignment: .leading)
+    var h4: Style = .init(font: .systemFont(ofSize: SectionType.h4.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
+    var h5: Style = .init(font: .systemFont(ofSize: SectionType.h5.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
+    var h6: Style = .init(font: .systemFont(ofSize: SectionType.h6.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
     var body: Style = .body
-    var blockquote: Style = .init(font: .systemFont(ofSize: SectionType.blockquote.defaultFontSize), fontColor: .red, backgroundColor: .white, alignment: .leading, paragraphStyle: .init())
-    var codeBlock: Style = .init(font: .systemFont(ofSize: SectionType.codeBlock.defaultFontSize), fontColor: .yellow, backgroundColor: .clear, alignment: .leading)
+    var blockquote: Style = .init(font: .systemFont(ofSize: SectionType.blockquote.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading, paragraphStyle:  {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.firstLineHeadIndent = 20
+        paragraphStyle.headIndent = 20
+        return paragraphStyle
+    }())
+    var codeBlock: Style = .init(font: .systemFont(ofSize: SectionType.codeBlock.defaultFontSize), fontColor: .lightGray, backgroundColor: .clear, alignment: .leading, paragraphStyle:  {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.firstLineHeadIndent = 20
+        paragraphStyle.headIndent = 20
+        return paragraphStyle
+    }())
     var unorderedList: Style = .body
     var orderedList: Style = .body
-    var link: Style = .init(font: .systemFont(ofSize: SectionType.body.defaultFontSize), fontColor: .blue, backgroundColor: .black, alignment: .leading, paragraphStyle: .init())
+    var link: Style = .init(font: .systemFont(ofSize: SectionType.body.defaultFontSize), fontColor: .init(red: 122, green: 155, blue: 171, alpha: 1), backgroundColor: .clear, alignment: .leading, paragraphStyle: .init())
     var image: AttachmentStyle = .init(alignment: .center)
-    var bold: Style = .init(font: .boldSystemFont(ofSize: SectionType.bold.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
-    var italic: Style = .init(font: .systemFont(ofSize: SectionType.italic.defaultFontSize), fontColor: .white, backgroundColor: .clear, alignment: .leading)
+    var bold: Style = .init(font: .boldSystemFont(ofSize: SectionType.bold.defaultFontSize), fontColor: .lightGray, backgroundColor: .clear, alignment: .leading)
+    var italic: Style = .init(font: .systemFont(ofSize: SectionType.italic.defaultFontSize), fontColor: .lightGray, backgroundColor: .clear, alignment: .leading)
     var paragraph: Style = .body
     
     func sectionType(for style: AnyKeyPath) -> SectionType {

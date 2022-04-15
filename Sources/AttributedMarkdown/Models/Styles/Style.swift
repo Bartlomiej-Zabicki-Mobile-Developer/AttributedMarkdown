@@ -24,7 +24,7 @@ public struct Style {
     private(set) var paragraphStyle: NSMutableParagraphStyle = .init()
     
     static let body: Style = .init(font: .systemFont(ofSize: SectionType.body.defaultFontSize),
-                                   fontColor: .white,
+                                   fontColor: .lightGray,
                                    backgroundColor: .clear,
                                    alignment: .leading,
                                    paragraphStyle: .init())
@@ -40,7 +40,7 @@ public struct Style {
     private(set) var paragraphStyle: NSMutableParagraphStyle = .init()
     
     static let body: Style = .init(font: .systemFont(ofSize: SectionType.body.defaultFontSize),
-                                   fontColor: .white,
+                                   fontColor: .lightGray,
                                    backgroundColor: .clear,
                                    alignment: .leading,
                                    paragraphStyle: .init())
