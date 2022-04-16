@@ -50,7 +50,16 @@ extension ContentView {
         
         @Published var selectedIndex: Int = 0
         @Published var curentFileContent: NSMutableAttributedString = .init()
-        private lazy var attributedMarkdownParser = AttributedMarkdownParser(configuration: .default)
+        private lazy var configuration: ParserConfiguration = {
+            var config = ParserConfiguration()
+            #if os(iOS)
+            config.sectionStyles.setForegroundColor(UIColor(named: "TextColor")!)
+            #else
+            config.sectionStyles.setForegroundColor(NSColor(named: "TextColor")!)
+            #endif
+            return config
+        }()
+        private lazy var attributedMarkdownParser = AttributedMarkdownParser(configuration: configuration)
         
         // MARK: - Public impementation
         

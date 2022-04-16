@@ -22,7 +22,7 @@ public enum Alignment {
 #if os(iOS)
 public struct Style {
     let font: UIFont
-    let fontColor: UIColor
+    var fontColor: UIColor
     ///If paragraphStyle provided, it overwrites alignment parameter
     let alignment: Alignment
     ///If provided, overwrites alignment parameter
@@ -43,7 +43,7 @@ public struct Style {
 #if os(macOS)
 public struct Style {
     let font: NSFont
-    let fontColor: NSColor
+    var fontColor: NSColor
     ///If paragraphStyle provided, it overwrites alignment parameter
     let alignment: Alignment
     ///If provided, overwrites alignment parameter

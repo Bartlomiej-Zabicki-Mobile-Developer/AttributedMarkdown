@@ -7,17 +7,21 @@
 
 import Foundation
 
-protocol ImagesHandler {
+public protocol ImagesHandler {
     func urlToSave(remoteURL: URL) -> URL?
 }
 
 public struct FilesImagesHandler: ImagesHandler {
     
-    let mainDirectory = "AttributedMarkdown/Images"
+    let mainDirectory: String
+    
+    public init(mainDirectory: String = "AttributedMarkdown/Images") {
+        self.mainDirectory = mainDirectory
+    }
     
     // MARK: - ImagesHandler
     
-    func urlToSave(remoteURL: URL) -> URL? {
+    public func urlToSave(remoteURL: URL) -> URL? {
         var documentsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
         let imagePath = remoteURL.pathComponents.filter({ $0 != "/" }).joined(separator: "_")
         documentsURL?.appendPathComponent(imagePath)

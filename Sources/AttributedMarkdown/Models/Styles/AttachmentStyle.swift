@@ -7,7 +7,10 @@
 
 import Foundation
 
-struct AttachmentStyle {
+public struct AttachmentStyle {
     let alignment: Alignment
     
+    public init(alignment: Alignment) {
+        self.alignment = alignment
+    }
 }
