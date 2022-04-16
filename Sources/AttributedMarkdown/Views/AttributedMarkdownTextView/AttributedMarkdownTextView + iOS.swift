@@ -34,7 +34,7 @@ struct AttributedMarkdownTextView: UIViewRepresentable {
         let view = iOSTextView()
         view.isEditable = false
         view.isSelectable = false
-        //        view.isScrollEnabled = false
+        view.isScrollEnabled = false
         view.attributedText = attributedString
         view.maxLayoutWidth = maxLayoutWidth
         return view
