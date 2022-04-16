@@ -11,6 +11,12 @@ extension AttributedMarkdownView {
     
     final class ViewModel: ObservableObject {
         
+        #if os(iOS)
+        typealias TextView = UITextView
+        #else
+        typealias TextView = NSTextView
+        #endif
+        
         // MARK: - Properties
         
         @Published var textViewPreferredSize: CGSize = .zero
@@ -21,7 +27,7 @@ extension AttributedMarkdownView {
         
         // MARK: - Public implementation
         
-        func textViewContentChanged(_ textView: NSTextView) {
+        func textViewContentChanged(_ textView: TextView) {
             textViewPreferredSize = textView.intrinsicContentSize
         }
         

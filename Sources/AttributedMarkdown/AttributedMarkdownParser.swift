@@ -60,37 +60,3 @@ public final class AttributedMarkdownParser {
     }
     
 }
-
-struct ImagesWalker: MarkupWalker {
-    
-    var imageURLs: [String] = []
-    
-    mutating func visitImage(_ image: Markdown.Image) {
-        if let source = image.source {
-            imageURLs.append(source)
-        }
-        descendInto(image)
-    }
-    
-}
-
-private struct ImageOutput {
-    let remoteURL: URL
-    let localURL: URL?
-}
-
-struct ImagesRewriter: MarkupRewriter {
-    
-    fileprivate var imageOutputs: [ImageOutput]
-    
-    mutating func visitImage(_ image: Markdown.Image) -> Markup? {
-        if let fetchedOutput = imageOutputs.first(where: { $0.remoteURL.absoluteString == image.source }), let localURL = fetchedOutput.localURL {
-            var image = image
-            image.source = localURL.path
-            return image
-        } else {
-            return image
-        }
-    }
-    
-}

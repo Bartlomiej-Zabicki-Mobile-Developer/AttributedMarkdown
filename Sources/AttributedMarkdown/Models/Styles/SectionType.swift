@@ -6,8 +6,13 @@
 //
 
 import Foundation
+#if os(iOS)
+import UIKit
+#else
+import AppKit
+#endif
 
-enum SectionType: CaseIterable, Equatable {
+public enum SectionType: CaseIterable, Equatable {
     case h6
     case h5
     case h4
@@ -35,7 +40,7 @@ extension SectionType {
         }
     }
     
-    var defaultFontSize: CGFloat {
+    public var defaultFontSize: CGFloat {
         switch self {
         case .h6:
             return 10

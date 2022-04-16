@@ -22,8 +22,8 @@ public struct AttributedMarkdownView: View {
     
     public var body: some View {
         GeometryReader { geometry in
-            // TODO: - Should calculate safe area insets
-            AttributedMarkdownTextView(attributedString, maxLayoutWidth: geometry.size.width, viewModel: viewModel)
+            let widthWithoutSafeArea = geometry.size.width - geometry.safeAreaInsets.leading - geometry.safeAreaInsets.trailing
+            AttributedMarkdownTextView(attributedString, maxLayoutWidth: widthWithoutSafeArea, viewModel: viewModel)
         }
         .frame(idealWidth: viewModel.textViewPreferredSize.width,
                idealHeight: viewModel.textViewPreferredSize.height)
