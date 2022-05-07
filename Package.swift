@@ -16,7 +16,7 @@ let package = Package(
             targets: ["AttributedMarkdown"]),
     ],
     dependencies: [
-        .package(name: "swift-markdown", path: "Dependencies/swift-markdown-main")
+        .package(url: "https://github.com/apple/swift-markdown.git", .branch("main")),
     ],
     targets: [
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
@@ -24,8 +24,5 @@ let package = Package(
         .target(
             name: "AttributedMarkdown",
             dependencies: [.productItem(name: "Markdown", package: "swift-markdown", condition: .none)]),
-        .testTarget(
-            name: "AttributedMarkdownTests",
-            dependencies: ["AttributedMarkdown"]),
     ]
 )
